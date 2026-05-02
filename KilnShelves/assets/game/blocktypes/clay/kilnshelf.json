@@ -1,0 +1,94 @@
+﻿{
+  "code": "kilnshelf",
+  "class": "BlockKilnShelf",
+  "entityClass": "BEKilnShelf",
+  "behaviors": [
+    {
+      "name": "UnstableFalling"
+    },
+    {
+      "name": "NWOrientable"
+    }
+  ],
+  "entityBehaviors": [],
+  "attributes": {
+    "handbook": {
+      "groupBy": [ "kilnshelf*" ],
+      "heatResistance": 0.9
+    }
+  },
+  "variantgroups": [
+    {
+      "code": "orientation",
+      "states": [ "ns", "we" ]
+    }
+  ],
+  "shape": {
+    "base": "block/clay/kilnshelf"
+  },
+  "shapebytype": {
+    "*-ns": {
+      "base": "block/clay/kilnshelf",
+      "rotateY": 0
+    },
+    "*-we": {
+      "base": "block/clay/kilnshelf",
+      "rotateY": 90
+    }
+  },
+  "selectionboxes": [
+    {
+      "x1": 0,
+      "y1": 0,
+      "z1": 0,
+      "x2": 1,
+      "y2": 0.0625,
+      "z2": 1
+    },
+    {
+      "x1": 0,
+      "y1": 0.4375,
+      "z1": 0,
+      "x2": 1,
+      "y2": 0.5625,
+      "z2": 1
+    },
+    {
+      "x1": 0,
+      "y1": 0.9375,
+      "z1": 0,
+      "x2": 1,
+      "y2": 1,
+      "z2": 1
+    }
+  ],
+  "maxStackSize": 32,
+  "sidesolid": {
+    "up": true,
+    "all": false
+  },
+  "sideopaque": {
+    "all": false
+  },
+  "blockmaterial": "Ceramic",
+  "lightAbsorption": 0,
+  "drops": [
+    {
+      "type": "item",
+      "code": "kilnshelf-ns",
+      "quantity": {
+        "avg": 1,
+        "var": 0
+      }
+    }
+
+  ],
+  "sounds": {
+    "walk": "walk/stone",
+    "place": "block/ceramicplace"
+  },
+  "creativeinventory": {
+    "general": [ "kilnshelf-ns" ],
+    "kilnshelves": [ "*" ]
+  }
+}

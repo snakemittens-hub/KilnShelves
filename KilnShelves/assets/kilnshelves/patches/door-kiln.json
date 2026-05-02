@@ -1,0 +1,18 @@
+﻿[
+  {
+    "op": "replace",
+    "path": "/attributes/multiblockStructure/blockNumbers",
+    "value": {
+      "@(claybricks-good-fire|refractorybricks-good-.*)": 1,
+      "multiblock-monolithic-0-p1-0": 2,
+      "doorkiln*": 3,
+      "cokeovendoor-*": 4,
+      "refractorybrickgrating-good-*": 5,
+      "@(air|refractorybrickgrating-good-.*)": 6,
+      "@(air|groundstorage|refractorybrickgrating-good-.*|kilnshelf-.*)": 7,
+      "@(air|groundstorage|kilnshelf-.*)": 8
+    },
+    "file": "game:blocktypes/clay/door-kiln.json",
+    "side": "Server"
+  }
+]
