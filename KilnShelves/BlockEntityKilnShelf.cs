@@ -3,353 +3,522 @@ using System.Collections.Generic;
 using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Config;
+using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
+using Vintagestory.API.Util;
 using Vintagestory.GameContent;
 
 namespace KilnShelves;
 
+public interface IShelvable
+{
+    public EnumShelvableLayout? GetShelvableType(ItemStack stack) => EnumShelvableLayout.Quadrants;
+    public ModelTransform? GetOnShelfTransform(ItemStack stack) => null;
+}
 //Use BEShelf inventory system but with Itemslot objects
 //BEBeehiveKiln uses UpdateGroundStorage(float hoursHeatReceived) as primary function
-    //Required structure: BlockEntityGroundStorage groundStorage.Inventory[index]
+//Required structure: BlockEntityGroundStorage groundStorage.inventory[index]
 public class BlockEntityKilnShelf : BlockEntityGroundStorage
 {
-    //copied from BEGroundStorage to avoid errors
-    ItemSlot isUsingSlot;
-    private GroundStorageRenderer renderer;
-    byte[] lastLightHsv;
-
     protected override int invSlotCount => 8;
+    public override InventoryBase Inventory => inventory;
+    public override string InventoryClassName => "kilnshelf";
+    public override string AttributeTransformCode => "onshelfTransform";
+    protected string GetSlotType(int slotid) => "shelf";
+    public BlockEntityKilnShelf()
+    {
+        inventory = new InventoryGeneric(invSlotCount, "shelf-0", null, (id, inv) => new ItemSlotDisplay(inv, GetSlotType(id)));
+    }
+    public override void Initialize(ICoreAPI api)
+    {
+        base.Initialize(api);
+    }
+
+    //////
+    /// Code modified from BlockEntityGroundStorage
+    //////
+    public override void CheckInventoryClearedMidTick() { return; } //BEGroundStorage destroys entity if inventory is cleared. We do not want this behavior.
+    public new bool OnTryCreateKiln() { return false; }
+    protected override void UpdateLegacyStorageLayouts() { return; } //If left enabled causes weird behavior with slots getting shoved around
+    public new void OnTransformed(IWorldAccessor worldAccessor, ITreeAttribute tree, int degreeRotation, Dictionary<int, AssetLocation> oldBlockIdMapping, Dictionary<int, AssetLocation> oldItemIdMapping, EnumAxis? flipAxis)
+    { return; }
+    public override void DetermineStorageProperties(ItemSlot sourceSlot) 
+    {
+        ItemStack sourceStack = inventory.FirstNonEmptySlot?.Itemstack ?? sourceSlot?.Itemstack;
+
+        var StorageProps = this.StorageProps;
+
+        //this section being disabled breaks rendering of inventory completely.
+        if (!forceStorageProps)
+        {
+            if (StorageProps == null)
+            {
+                if (sourceStack == null) return;
+
+                StorageProps = this.StorageProps = sourceStack.Collectible?.GetBehavior<CollectibleBehaviorGroundStorable>()?.StorageProps;
+            }
+        }
+
+        if (StorageProps == null) return;  // Seems necessary to avoid crash with certain items placed in game version 1.15-pre.1?
+    }
     public override int DisplayedItems
     {
         get
         {
-            if (StorageProps == null) return 0;
-            switch (StorageProps.Layout)
-            {
-                case EnumGroundStorageLayout.SingleCenter: return 1;
-                case EnumGroundStorageLayout.Halves: return 2;
-                //case EnumGroundStorageLayout.WallHalves: return 2;
-                case EnumGroundStorageLayout.Quadrants: return 4;
-                //case EnumGroundStorageLayout.Messy12: return 1; // Pretend its only one, but we'll render 12
-                //case EnumGroundStorageLayout.Stacking: return 1;
-            }
+            return inventory.Count;
+        }
+    }
 
-            return 0;
-        }
-    }
-    public new int Capacity
-    {
-        get
-        {
-            if (StorageProps == null) return 1;
-            switch (StorageProps.Layout)
-            {
-                case EnumGroundStorageLayout.SingleCenter: return 1;
-                case EnumGroundStorageLayout.Halves: return 2;
-                //case EnumGroundStorageLayout.WallHalves: return 2;
-                case EnumGroundStorageLayout.Quadrants: return 4;
-                //case EnumGroundStorageLayout.Messy12: return 12;
-                //case EnumGroundStorageLayout.Stacking: return StorageProps.StackingCapacity;
-                default: return 1;
-            }
-        }
-    }
-    public override void CheckInventoryClearedMidTick() { return; } //BEGroundStorage destroys entity if inventory is cleared. We do not want this behavior.
-    public new bool CanAttachBlockAt(BlockFacing blockFace, Cuboidi attachmentArea)
-    {
-        return blockFace == BlockFacing.UP; //&& shelves == 2;
-    }
-    public new bool OnTryCreateKiln() { return false; }
     public override bool OnPlayerInteractStart(IPlayer player, BlockSelection bs)
     {
-        isUsingSlot = null;
-        if (GetSlotAt(bs) is ItemSlot ourSlot && !ourSlot.Empty)
+        ItemSlot slot = player.InventoryManager.ActiveHotbarSlot;
+
+        if (TryUse(player, bs)) return true;
+        else if (slot.Empty) return TryTake(player, bs);
+        else if (GetShelvableLayout(slot.Itemstack) != null) return TryPut(player, bs);
+
+        return false;
+    }
+    //////
+    ///End code modified from BEGroundStorage
+    //////
+
+    //////
+    ///Code imported/modified from BlockEntityShelf
+    //////
+    public static EnumShelvableLayout? GetShelvableLayout(ItemStack? stack)
+    {
+        if (stack == null) return null;
+
+        var attr = stack.Collectible?.Attributes;
+        var layout = stack.Collectible?.GetCollectibleInterface<IShelvable>()?.GetShelvableType(stack);
+
+        layout ??= attr?["shelvable"].AsString() switch
         {
-            var collIci = ourSlot.Itemstack.Collectible.GetCollectibleInterface<IContainedInteractable>();
-            if (collIci?.OnContainedInteractStart(this, ourSlot, player, bs) == true)
+            "Quadrants" => EnumShelvableLayout.Quadrants,
+            "Halves" => EnumShelvableLayout.Halves,
+            "SingleCenter" => EnumShelvableLayout.SingleCenter,
+            _ => null
+        };
+
+        layout ??= attr?["shelvable"].AsBool() == true ? EnumShelvableLayout.Quadrants : null;
+
+        return layout;
+    }
+    public bool CanUse(ItemStack? stack, BlockSelection blockSel)
+    {
+        if (stack == null) return false;
+
+        var obj = stack.Collectible;
+        bool top = blockSel.SelectionBoxIndex == 4;
+
+        bool up = blockSel.SelectionBoxIndex > 1;
+        bool left = (blockSel.SelectionBoxIndex % 2) == 0;
+        var shelvableLayout = GetShelvableLayout(inventory[up ? 4 : 0].Itemstack);
+        if (shelvableLayout is not EnumShelvableLayout.SingleCenter)
+        {
+            if (!left) shelvableLayout = GetShelvableLayout(inventory[up ? 6 : 2].Itemstack);
+        }
+
+        int start = (up ? 4 : 0) + (shelvableLayout is EnumShelvableLayout.SingleCenter ? 0 : (left ? 0 : 2));
+        int end = start + (shelvableLayout is EnumShelvableLayout.Halves or EnumShelvableLayout.SingleCenter ? 1 : 2);
+
+        CollectibleObject invColl;
+        for (int i = end - 1; i >= start; i--)
+        {
+            if (inventory[i].Empty) continue;
+
+            invColl = inventory[i].Itemstack.Collectible;
+
+            if (obj?.Attributes?["mealContainer"]?.AsBool() == true || obj is IContainedInteractable or IBlockMealContainer)
             {
-                BlockGroundStorage.IsUsingContainedBlock = true;
-                isUsingSlot = ourSlot;
-                return true;
+                return invColl is BlockCookedContainerBase;
+            }
+
+            if (obj?.Attributes?["canSealCrock"]?.AsBool() == true)
+            {
+                return invColl is BlockCrock;
             }
         }
 
-        ItemSlot hotbarSlot = player.InventoryManager.ActiveHotbarSlot;
+        return false;
+    }
 
-        if (!hotbarSlot.Empty && !hotbarSlot.Itemstack.Collectible.HasBehavior<CollectibleBehaviorGroundStorable>()) return false;
+    public bool CanPlace(ItemStack? stack, BlockSelection blockSel, out bool canTake)
+    {
+        bool up = blockSel.SelectionBoxIndex > 1;
+        bool left = (blockSel.SelectionBoxIndex % 2) == 0;
 
-        if (!BlockBehaviorReinforcable.AllowRightClickPickup(Api.World, Pos, player)) return false;
-
-        DetermineStorageProperties(hotbarSlot);
-
-        bool ok = false;
-
-        if (StorageProps != null)
+        if (GetShelvableLayout(inventory[up ? 4 : 0].Itemstack) is EnumShelvableLayout shelvableLayoutFullSlot &&
+            (shelvableLayoutFullSlot is EnumShelvableLayout.SingleCenter || (shelvableLayoutFullSlot is EnumShelvableLayout.Halves && left)) ||
+            (GetShelvableLayout(inventory[up ? 6 : 2].Itemstack) is EnumShelvableLayout.Halves && !left))
         {
-            if (!hotbarSlot.Empty && StorageProps.CtrlKey && !player.Entity.Controls.CtrlKey) return false;
+            canTake = true;
+            return false;
+        }
 
-            // fix RAD rotation being CCW - since n=0, e=-PiHalf, s=Pi, w=PiHalf so we swap east and west by inverting sign
-            // changed since > 1.18.1 since east west on WE rotation was broken, to allow upgrading/downgrading without issues we invert the sign for all* usages instead of saving new value
-            var hitPos = rotatedOffset(bs.HitPosition.ToVec3f(), -MeshAngle);
+        var shelvableLayout = GetShelvableLayout(stack);
 
-            if (StorageProps.Layout == EnumGroundStorageLayout.Quadrants && inventory.Empty)
+        int start = (up ? 4 : 0) + (shelvableLayout is EnumShelvableLayout.SingleCenter ? 0 : (left ? 0 : 2));
+        int end = start + (shelvableLayout is EnumShelvableLayout.Halves or EnumShelvableLayout.SingleCenter ? 1 : 2);
+
+        canTake = false;
+        bool canPlace = false;
+        for (int i = end - 1; i >= start; i--)
+        {
+            if (inventory[i].Empty) canPlace = true;
+            else canTake = true;
+        }
+
+        return canPlace;
+    }
+
+    private bool TryUse(IPlayer player, BlockSelection blockSel)
+    {
+        bool up = blockSel.SelectionBoxIndex > 1;
+        bool left = (blockSel.SelectionBoxIndex % 2) == 0;
+        var shelvableLayout = GetShelvableLayout(inventory[up ? 4 : 0].Itemstack);
+        if (shelvableLayout is not EnumShelvableLayout.SingleCenter)
+        {
+            if (!left) shelvableLayout = GetShelvableLayout(inventory[up ? 6 : 2].Itemstack);
+        }
+
+        int start = (up ? 4 : 0) + (shelvableLayout is EnumShelvableLayout.SingleCenter ? 0 : (left ? 0 : 2));
+        int end = start + (shelvableLayout is EnumShelvableLayout.Halves or EnumShelvableLayout.SingleCenter ? 1 : 2);
+
+        if (player.Entity.Controls.ShiftKey) return false;
+
+        for (int i = end - 1; i >= start; i--)
+        {
+            var collIci = inventory[i].Itemstack?.Collectible.GetCollectibleInterface<IContainedInteractable>();
+            if (collIci != null)
             {
-                double dx = Math.Abs(hitPos.X - 0.5);
-                double dz = Math.Abs(hitPos.Z - 0.5);
-                if (dx < 2 / 16f && dz < 2 / 16f)
+                if (collIci.OnContainedInteractStart(this, inventory[i], player, blockSel))
                 {
-                    overrideLayout = EnumGroundStorageLayout.SingleCenter;
-                    DetermineStorageProperties(hotbarSlot);
+                    MarkDirty();
+                    return true;
                 }
             }
+        }
 
-            switch (StorageProps.Layout)
+        return false;
+    }
+
+    private bool TryPut(IPlayer byPlayer, BlockSelection blockSel)
+    {
+        var heldSlot = byPlayer.InventoryManager.ActiveHotbarSlot;
+
+        bool up = blockSel.SelectionBoxIndex > 1;
+        bool left = (blockSel.SelectionBoxIndex % 2) == 0;
+
+        int filledSlots = 0;
+        var shelvableLayout = GetShelvableLayout(heldSlot.Itemstack);
+
+        int start = (up ? 4 : 0) + (shelvableLayout is EnumShelvableLayout.SingleCenter ? 0 : (left ? 0 : 2));
+        int end = start + (shelvableLayout is EnumShelvableLayout.SingleCenter ? 4 : 2);
+
+        if (shelvableLayout is EnumShelvableLayout.Halves or EnumShelvableLayout.SingleCenter)
+        {
+            for (int i = start; i < end; i++)
             {
-                case EnumGroundStorageLayout.SingleCenter:
-                    if (StorageProps.RandomizeCenterRotation)
-                    {
-                        double randomX = Api.World.Rand.NextDouble() * 6.28 - 3.14;
-                        double randomZ = Api.World.Rand.NextDouble() * 6.28 - 3.14;
-                        MeshAngle = (float)Math.Atan2(randomX, randomZ);
-                    }
-                    ok = putOrGetItemSingle(inventory[0], player, bs);
-                    break;
+                if (!inventory[i].Empty)
+                {
+                    var layout = GetShelvableLayout(inventory[i].Itemstack);
+                    filledSlots += layout is EnumShelvableLayout.SingleCenter ? 4 : layout is EnumShelvableLayout.Halves ? 2 : 1;
+                }
+            }
+        }
+
+        if (filledSlots > 0 && filledSlots < (shelvableLayout is EnumShelvableLayout.SingleCenter ? 4 : 2))
+        {
+            (Api as ICoreClientAPI)?.TriggerIngameError(this, "needsmorespace", Lang.Get("shelfhelp-needsmorespace-error"));
+            return false;
+        }
+
+        if (shelvableLayout is not EnumShelvableLayout.SingleCenter) shelvableLayout = GetShelvableLayout(inventory[up ? 4 : 0].Itemstack);
+        if (shelvableLayout is not EnumShelvableLayout.SingleCenter && !left) shelvableLayout = GetShelvableLayout(inventory[up ? 6 : 2].Itemstack);
+
+        start = (up ? 4 : 0) + (shelvableLayout is EnumShelvableLayout.SingleCenter ? 0 : (left ? 0 : 2));
+        end = start + (shelvableLayout is EnumShelvableLayout.Halves or EnumShelvableLayout.SingleCenter ? 1 : 2);
+
+        for (int i = start; i < end; i++)
+        {
+            if (!inventory[i].Empty) continue;
+
+            int moved = heldSlot.TryPutInto(Api.World, inventory[i]);
+            MarkDirty();
+            (Api as ICoreClientAPI)?.World.Player.TriggerFpAnimation(EnumHandInteract.HeldItemInteract);
+
+            if (moved > 0)
+            {
+                Api.World.PlaySoundAt(inventory[i].Itemstack?.Block?.Sounds?.Place ?? GlobalConstants.DefaultBuildSound, byPlayer.Entity, byPlayer);
+                Api.World.Logger.Audit("{0} Put 1x{1} into Shelf index {3} at {2}.",
+                    byPlayer.PlayerName,
+                    inventory[i].Itemstack?.Collectible.Code,
+                    Pos,
+                    i
+                );
+                return true;
+            }
+
+            return false;
+        }
+
+        (Api as ICoreClientAPI)?.TriggerIngameError(this, "shelffull", Lang.Get("shelfhelp-shelffull-error"));
+        return false;
+    }
+
+    private bool TryTake(IPlayer byPlayer, BlockSelection blockSel)
+    {
+        bool up = blockSel.SelectionBoxIndex > 1;
+        bool left = (blockSel.SelectionBoxIndex % 2) == 0;
+        var shelvableLayout = GetShelvableLayout(inventory[up ? 4 : 0].Itemstack);
+        if (shelvableLayout is not EnumShelvableLayout.SingleCenter)
+        {
+            if (!left) shelvableLayout = GetShelvableLayout(inventory[up ? 6 : 2].Itemstack);
+        }
+
+        int start = (up ? 4 : 0) + (shelvableLayout is EnumShelvableLayout.SingleCenter ? 0 : (left ? 0 : 2));
+        int end = start + (shelvableLayout is EnumShelvableLayout.SingleCenter ? 4 : 2);
+
+        for (int i = end - 1; i >= start; i--)
+        {
+            if (inventory[i].Empty) continue;
+
+            ItemStack? stack = inventory[i].TakeOut(1);
+            if (byPlayer.InventoryManager.TryGiveItemstack(stack))
+            {
+                SoundAttributes? sound = stack?.Block?.Sounds?.Place;
+                Api.World.PlaySoundAt(sound ?? GlobalConstants.DefaultBuildSound, byPlayer.Entity, byPlayer);
+            }
+
+            if (stack?.StackSize > 0)
+            {
+                Api.World.SpawnItemEntity(stack, Pos);
+            }
+            Api.World.Logger.Audit("{0} Took 1x{1} from Shelf index {3} at {2}.",
+                byPlayer.PlayerName,
+                stack?.Collectible.Code,
+                Pos,
+                i
+            );
+
+            (Api as ICoreClientAPI)?.World.Player.TriggerFpAnimation(EnumHandInteract.HeldItemInteract);
+            MarkDirty();
+
+            return true;
+        }
+
+        return false;
+    }
+    protected override float[][] genTransformationMatrices()
+    {
+        float[][] tfMatrices = new float[invSlotCount][];
+
+        for (int index = 0; index < invSlotCount; index++)
+        {
+            var shelvableType = GetShelvableLayout(inventory[index].Itemstack);
+
+            float x = ((index % 4) >= 2) ? 12 / 16f : 4 / 16f;
+            float y = index >= 4 ? 0.5f : 0f;
+            float z = (index % 2 == 0) ? 4 / 16f : 12 / 16f;
+
+            if (index is 0 or 4 && shelvableType is EnumShelvableLayout.SingleCenter) x = 0.5f;
+            if (index is 0 or 2 or 4 or 6 && shelvableType is EnumShelvableLayout.Halves or EnumShelvableLayout.SingleCenter) z = 0.5f;
+
+            tfMatrices[index] =
+                new Matrixf()
+                .Translate(0.5f, 0, 0.5f)
+                .RotateYDeg(Block.Shape.rotateY)
+                .Translate(x - 0.5f, y, z - 0.5f)
+                .Translate(-0.5f, 0, -0.5f)
+                .Values
+            ;
+        }
+
+        return tfMatrices;
+    }
+    #region Block info
+
+    public override void GetBlockInfo(IPlayer forPlayer, StringBuilder sb)
+    {
+        base.GetBlockInfo(forPlayer, sb);
 
 
-                //case EnumGroundStorageLayout.WallHalves:
-                case EnumGroundStorageLayout.Halves:
-                    if (hitPos.X < 0.5)
+        float ripenRate = GameMath.Clamp(((1 - container.GetPerishRate()) - 0.5f) * 3, 0, 1);
+        if (ripenRate > 0)
+        {
+            sb.Append(Lang.Get("Suitable spot for food ripening."));
+        }
+
+        sb.AppendLine();
+
+        bool up = forPlayer.CurrentBlockSelection != null && forPlayer.CurrentBlockSelection.SelectionBoxIndex > 1;
+
+        for (int j = 3; j >= 0; j--)
+        {
+            int i = j + (up ? 4 : 0);
+            i ^= 2;   //Display shelf contents text for items from left-to-right, not right-to-left
+
+            if (inventory[i].Empty) continue;
+
+            ItemStack? stack = inventory[i].Itemstack;
+
+            var transitionableProps = stack?.Collectible?.GetTransitionableProperties(Api.World, stack, forPlayer.Entity);
+            if (transitionableProps != null && transitionableProps.Length > 0)
+            {
+                sb.Append(PerishableInfoCompact(Api, inventory[i], ripenRate));
+            }
+            else
+            {
+                sb.AppendLine(stack?.Collectible.GetCollectibleInterface<IContainedCustomName>()?.GetContainedInfo(inventory[i]) ?? stack?.GetName() ?? Lang.Get("unknown"));
+            }
+        }
+    }
+
+    public static string PerishableInfoCompact(ICoreAPI Api, ItemSlot contentSlot, float ripenRate, bool withStackName = true)
+    {
+        if (contentSlot.Empty) return "";
+
+        StringBuilder dsc = new StringBuilder();
+
+        if (withStackName)
+        {
+            dsc.Append(contentSlot.Itemstack.GetName());
+        }
+
+        TransitionState[]? transitionStates = contentSlot.Itemstack.Collectible.UpdateAndGetTransitionStates(Api.World, contentSlot);
+        if (transitionStates == null) return dsc.ToString();
+
+        bool nowSpoiling = false;
+        bool appendLine = false;
+        for (int i = 0; i < transitionStates.Length; i++)
+        {
+            TransitionState state = transitionStates[i];
+
+            TransitionableProperties prop = state.Props;
+            float perishRate = contentSlot.Itemstack.Collectible.GetTransitionRateMul(Api.World, contentSlot, prop.Type);
+
+            if (perishRate <= 0) continue;
+
+            float transitionLevel = state.TransitionLevel;
+            float freshHoursLeft = state.FreshHoursLeft / perishRate;
+
+            switch (prop.Type)
+            {
+                case EnumTransitionType.Perish:
+
+                    appendLine = true;
+
+                    if (transitionLevel > 0)
                     {
-                        ok = putOrGetItemSingle(inventory[0], player, bs);
+                        nowSpoiling = true;
+                        dsc.Append(", " + Lang.Get("{0}% spoiled", (int)Math.Round(transitionLevel * 100)));
                     }
                     else
                     {
-                        ok = putOrGetItemSingle(inventory[1], player, bs);
+                        double hoursPerday = Api.World.Calendar.HoursPerDay;
+
+                        if (freshHoursLeft / hoursPerday >= Api.World.Calendar.DaysPerYear)
+                        {
+                            dsc.Append(", " + Lang.Get("fresh for {0} years", Math.Round(freshHoursLeft / hoursPerday / Api.World.Calendar.DaysPerYear, 1)));
+                        }
+                        else if (freshHoursLeft > hoursPerday)
+                        {
+                            dsc.Append(", " + Lang.Get("fresh for {0} days", Math.Round(freshHoursLeft / hoursPerday, 1)));
+                        }
+                        else
+                        {
+                            dsc.Append(", " + Lang.Get("fresh for {0} hours", Math.Round(freshHoursLeft, 1)));
+                        }
                     }
                     break;
 
-                case EnumGroundStorageLayout.Quadrants:
-                    int pos = ((hitPos.X > 0.5) ? 2 : 0) + ((hitPos.Z > 0.5) ? 1 : 0);
-                    ok = putOrGetItemSingle(inventory[pos], player, bs);
+                case EnumTransitionType.Ripen:
+                    if (nowSpoiling) break;
+
+                    appendLine = true;
+
+                    if (transitionLevel > 0)
+                    {
+                        dsc.Append(", " + Lang.Get("{1:0.#} days left to ripen ({0}%)", (int)Math.Round(transitionLevel * 100), (state.TransitionHours - state.TransitionedHours) / Api.World.Calendar.HoursPerDay / ripenRate));
+                    }
+                    else
+                    {
+                        double hoursPerday = Api.World.Calendar.HoursPerDay;
+
+                        if (freshHoursLeft / hoursPerday >= Api.World.Calendar.DaysPerYear)
+                        {
+                            dsc.Append(", " + Lang.Get("will ripen in {0} years", Math.Round(freshHoursLeft / hoursPerday / Api.World.Calendar.DaysPerYear, 1)));
+                        }
+                        else if (freshHoursLeft > hoursPerday)
+                        {
+                            dsc.Append(", " + Lang.Get("will ripen in {0} days", Math.Round(freshHoursLeft / hoursPerday, 1)));
+                        }
+                        else
+                        {
+                            dsc.Append(", " + Lang.Get("will ripen in {0} hours", Math.Round(freshHoursLeft, 1)));
+                        }
+                    }
                     break;
-
-                //case EnumGroundStorageLayout.Messy12:
-                //case EnumGroundStorageLayout.Stacking:
-                //    ok = putOrGetItemStacking(player, bs);
-                //    break;
-            }
-        }
-        //UpdateIgnitable();
-        renderer?.UpdateTemps();
-
-        if (ok)
-        {
-            MarkDirty();    // Don't re-draw on client yet, that will be handled in FromTreeAttributes after we receive an updating packet from the server  (updating meshes here would have the wrong inventory contents, and also create a potential race condition)
-        }
-
-        //if (inventory.Empty && !clientsideFirstPlacement)
-        //{
-        //    Api.World.BlockAccessor.SetBlock(0, Pos);
-        //    Api.World.BlockAccessor.TriggerNeighbourBlockUpdate(Pos);
-        //    if (lastLightHsv != null && lastLightHsv[2] > 0)
-        //    {
-        //        Api.World.BlockAccessor.RemoveBlockLight((byte[])lastLightHsv.Clone(), Pos);
-        //    }
-        //}
-        //else
-        {
-            var lshv = GetLightHsv();
-            if ((lastLightHsv != null && lastLightHsv[2] > 0) && (lshv == null || lshv[2] == 0))
-            {
-                Api.World.BlockAccessor.RemoveBlockLight((byte[])lastLightHsv.Clone(), Pos);
             }
         }
 
-        return ok;
+        if (appendLine) dsc.AppendLine();
+
+        return dsc.ToString();
     }
-    //public new ItemSlot GetSlotAt(BlockSelection bs) //code duplicated for second shelf
-    //{
-    //    if (StorageProps == null) return null;
-    //    var hitPos = rotatedOffset(bs.HitPosition.ToVec3f(), -MeshAngle);
 
-    //    if (hitPos.Y < 0.5)
-    //    {
-    //        switch (StorageProps.Layout)
-    //        {
-    //            case EnumGroundStorageLayout.Halves:
-    //                //case EnumGroundStorageLayout.WallHalves:
-    //                if (hitPos.X < 0.5)
-    //                {
-    //                    return inventory[0];
-    //                }
-    //                else
-    //                {
-    //                    return inventory[1];
-    //                }
+    #endregion
+    //////
+    ///End code from BEShelf
+    //////
 
-    //            case EnumGroundStorageLayout.Quadrants:
-    //                int pos = ((hitPos.X > 0.5) ? 2 : 0) + ((hitPos.Z > 0.5) ? 1 : 0);
-    //                return inventory[pos];
+    //////
+    ///Code imported from BEContainerDisplay to undo BEGroundStorage override
+    //////
+    protected override MeshData getOrCreateMesh(ItemSlot slot, int index)
+    {
+        MeshData mesh = getMesh(slot);
+        if (mesh != null) return mesh;
 
+        var stack = slot.Itemstack;
+        CompositeShape customShape = stack.Collectible.Attributes?["displayedShape"].AsObject<CompositeShape>(null, stack.Collectible.Code.Domain);
+        if (customShape != null)
+        {
+            string customkey = "displayedShape-" + customShape.ToString();
+            mesh = ObjectCacheUtil.GetOrCreate(capi, customkey, () =>
+                capi.TesselatorManager.CreateMesh(
+                    "displayed item shape",
+                    customShape,
+                    (shape, name) => new ContainedTextureSource(capi, capi.BlockTextureAtlas, shape.Textures, string.Format("For displayed item {0}", stack.Collectible.Code)),
+                    null
+            ));
+        }
+        else
+        {
+            IContainedMeshSource meshSource = stack.Collectible?.GetCollectibleInterface<IContainedMeshSource>();
 
-    //            case EnumGroundStorageLayout.SingleCenter:
-    //                //case EnumGroundStorageLayout.Messy12:
-    //                //case EnumGroundStorageLayout.Stacking:
-    //                return inventory[0];
-    //        }
-    //    }
-    //    else
-    //    {
-    //        switch (StorageProps.Layout)
-    //        {
-    //            case EnumGroundStorageLayout.Halves:
-    //                //case EnumGroundStorageLayout.WallHalves:
-    //                if (hitPos.X < 0.5)
-    //                {
-    //                    return inventory2[0];
-    //                }
-    //                else
-    //                {
-    //                    return inventory2[1];
-    //                }
+            if (meshSource != null)
+            {
+                mesh = meshSource.GenMesh(slot, capi.BlockTextureAtlas, Pos);
+            }
+        }
 
-    //            case EnumGroundStorageLayout.Quadrants:
-    //                int pos = ((hitPos.X > 0.5) ? 2 : 0) + ((hitPos.Z > 0.5) ? 1 : 0);
-    //                return inventory2[pos];
+        if (mesh == null)
+        {
+            mesh = getDefaultMesh(stack);
+        }
 
+        applyDefaultTranforms(stack, mesh);
 
-    //            case EnumGroundStorageLayout.SingleCenter:
-    //                //case EnumGroundStorageLayout.Messy12:
-    //                //case EnumGroundStorageLayout.Stacking:
-    //                return inventory2[0];
-    //        }
-    //    }
+        string key = getMeshCacheKey(slot);
+        MeshCache[key] = mesh;
 
-    //    return null;
-    //}
-
-    //public override void DetermineStorageProperties(ItemSlot sourceSlot) //needs changes?
-    //{
-    //    base.DetermineStorageProperties(sourceSlot);
-    //}
-    //public new int UsableSlots(EnumGroundStorageLayout layout)
-    //{
-    //    switch (layout)
-    //    {
-    //        case EnumGroundStorageLayout.SingleCenter: return 1;
-    //        case EnumGroundStorageLayout.Halves: return 2;
-    //        //case EnumGroundStorageLayout.WallHalves: return 2;
-    //        case EnumGroundStorageLayout.Quadrants: return 4;
-    //        //case EnumGroundStorageLayout.Messy12: return 1;
-    //        //case EnumGroundStorageLayout.Stacking: return 1;
-    //        default: return 0;
-    //    }
-    //}
-    //public new bool putOrGetItemSingle(ItemSlot ourSlot, IPlayer player, BlockSelection bs) //needs changes
-    //{
-    //    ItemSlot hotbarSlot = player.InventoryManager.ActiveHotbarSlot;
-
-    //    if (!hotbarSlot.Empty && !inventory.Empty)
-    //    {
-    //        var hotbarlayout = hotbarSlot.Itemstack.Collectible.GetBehavior<CollectibleBehaviorGroundStorable>()?.StorageProps.Layout;
-    //        bool layoutEqual = StorageProps.Layout == hotbarlayout;
-
-    //        if (StorageProps.Layout == EnumGroundStorageLayout.Quadrants && hotbarlayout == EnumGroundStorageLayout.Messy12)
-    //        {
-    //            layoutEqual = true;
-    //            overrideLayout = EnumGroundStorageLayout.Quadrants;
-    //        }
-
-    //        if (!layoutEqual) return false;
-    //    }
-
-    //    lock (inventoryLock)
-    //    {
-    //        if (ourSlot.Empty)
-    //        {
-    //            if (hotbarSlot.Empty || !player.Entity.Controls.ShiftKey) return false;
-
-    //            if (player.WorldData.CurrentGameMode == EnumGameMode.Creative)
-    //            {
-    //                ItemStack stack = hotbarSlot.Itemstack.Clone();
-    //                stack.StackSize = 1;
-    //                if (new DummySlot(stack).TryPutInto(Api.World, ourSlot, TransferQuantity) > 0)
-    //                {
-    //                    Api.World.PlaySoundAt(StorageProps.PlaceRemoveSound, Pos.X + 0.5, Pos.InternalY, Pos.Z + 0.5, player, 0.88f + (float)Api.World.Rand.NextDouble() * 0.24f, 16);
-    //                    Api.World.Logger.Audit("{0} Put 1x{1} into Kiln Shelf at {2}.",
-    //                        player.PlayerName,
-    //                        ourSlot.Itemstack.Collectible.Code,
-    //                        Pos
-    //                    );
-    //                    LightUpdate(stack);
-    //                }
-    //            }
-    //            else
-    //            {
-    //                if (hotbarSlot.TryPutInto(Api.World, ourSlot, TransferQuantity) > 0)
-    //                {
-    //                    Api.World.PlaySoundAt(StorageProps.PlaceRemoveSound, Pos.X + 0.5, Pos.InternalY, Pos.Z + 0.5, player, 0.88f + (float)Api.World.Rand.NextDouble() * 0.24f, 16);
-    //                    Api.World.Logger.Audit("{0} Put 1x{1} into Kiln Shelf at {2}.",
-    //                        player.PlayerName,
-    //                        ourSlot.Itemstack.Collectible.Code,
-    //                        Pos
-    //                    );
-    //                    LightUpdate(ourSlot.Itemstack);
-    //                }
-    //            }
-    //        }
-    //        else
-    //        {
-    //            if (!player.InventoryManager.TryGiveItemstack(ourSlot.Itemstack, true))
-    //            {
-    //                Api.World.SpawnItemEntity(ourSlot.Itemstack, Pos);
-    //            }
-
-    //            LightUpdate(ourSlot.Itemstack);
-
-    //            Api.World.PlaySoundAt(StorageProps.PlaceRemoveSound, Pos.X + 0.5, Pos.InternalY, Pos.Z + 0.5, player, 0.88f + (float)Api.World.Rand.NextDouble() * 0.24f, 16);
-
-    //            Api.World.Logger.Audit("{0} Took 1x{1} from Kiln Shelf at {2}.",
-    //                player.PlayerName,
-    //                ourSlot.Itemstack?.Collectible.Code,
-    //                Pos
-    //            );
-    //            ourSlot.Itemstack = null;
-    //            ourSlot.MarkDirty();
-    //        }
-    //    }
-
-    //    return true;
-    //}
-    //public new void GetLayoutOffset(Vec3f[] offs) //needs changes
-    //{
-    //    if (StorageProps == null) return;
-    //    switch (StorageProps.Layout)
-    //    {
-    //        //case EnumGroundStorageLayout.Messy12:
-    //        //case EnumGroundStorageLayout.SingleCenter:
-    //        case EnumGroundStorageLayout.Stacking:
-    //            offs[0] = new Vec3f();
-    //            break;
-
-    //        case EnumGroundStorageLayout.Halves:
-    //        //case EnumGroundStorageLayout.WallHalves:
-    //            // Left
-    //            offs[0] = new Vec3f(-0.25f, 0, 0);
-    //            // Right
-    //            offs[1] = new Vec3f(0.25f, 0, 0);
-    //            break;
-
-    //        case EnumGroundStorageLayout.Quadrants:
-    //            // Top left
-    //            offs[0] = new Vec3f(-0.25f, 0, -0.25f);
-    //            // Top right
-    //            offs[1] = new Vec3f(-0.25f, 0, 0.25f);
-    //            // Bot left
-    //            offs[2] = new Vec3f(0.25f, 0, -0.25f);
-    //            // Bot right
-    //            offs[3] = new Vec3f(0.25f, 0, 0.25f);
-    //            break;
-    //    }
-    //}
+        return mesh;
+    }
+    //////
+    ///End code from BEContainerDisplay
+    //////
 }

@@ -8,8 +8,8 @@
 	"textureSizes": {
 	},
 	"textures": {
-		"fire": "block/clay/hardened/fire",
-		"material": "block/clay/brickpile/burned/fire-brick1"
+		"material": "block/clay/brickpile/burned/fire-brick1",
+		"fire": "block/clay/hardened/fire"
 	},
 	"elements": [
 		{
@@ -28,9 +28,10 @@
 			"children": [
 				{
 					"name": "brick",
-					"from": [ -0.5, -7.0, -0.5 ],
-					"to": [ 1.5, 0.0, 3.5 ],
-					"rotationOrigin": [ 0.5, 0.0, 1.5 ],
+					"from": [ 0.5, -7.0, -1.5 ],
+					"to": [ 2.5, 0.0, 2.5 ],
+					"rotationOrigin": [ 1.5, 0.0, 0.5 ],
+					"rotationY": -90.0,
 					"faces": {
 						"north": { "texture": "#material", "uv": [ 9.0, 6.0, 16.0, 8.0 ], "rotation": 90 },
 						"east": { "texture": "#material", "uv": [ 9.0, 4.0, 16.0, 8.0 ], "rotation": 90, "windMode": [-1,-1,-1,-1] },
@@ -42,10 +43,10 @@
 				},
 				{
 					"name": "brick2",
-					"from": [ 13.5, -7.0, -0.5 ],
-					"to": [ 15.5, 0.0, 3.5 ],
-					"rotationOrigin": [ 14.5, 0.0, 1.5 ],
-					"rotationY": 180.0,
+					"from": [ 12.5, -7.0, -1.5 ],
+					"to": [ 14.5, 0.0, 2.5 ],
+					"rotationOrigin": [ 13.5, 0.0, 0.5 ],
+					"rotationY": 90.0,
 					"faces": {
 						"north": { "texture": "#material", "uv": [ 9.0, 2.0, 16.0, 4.0 ], "rotation": 90 },
 						"east": { "texture": "#material", "uv": [ 9.0, 4.0, 16.0, 8.0 ], "rotation": 90, "windMode": [-1,-1,-1,-1] },
@@ -132,9 +133,10 @@
 				},
 				{
 					"name": "brick7",
-					"from": [ -0.5, -7.0, 11.5 ],
-					"to": [ 1.5, 0.0, 15.5 ],
-					"rotationOrigin": [ 0.5, 0.0, 13.5 ],
+					"from": [ 0.5, -7.0, 12.5 ],
+					"to": [ 2.5, 0.0, 16.5 ],
+					"rotationOrigin": [ 1.5, 0.0, 14.5 ],
+					"rotationY": 90.0,
 					"faces": {
 						"north": { "texture": "#material", "uv": [ 0.0, 6.0, 7.0, 8.0 ], "rotation": 90 },
 						"east": { "texture": "#material", "uv": [ 0.0, 4.0, 7.0, 8.0 ], "rotation": 90, "windMode": [-1,-1,-1,-1] },
@@ -146,10 +148,10 @@
 				},
 				{
 					"name": "brick8",
-					"from": [ 13.5, -7.0, 11.5 ],
-					"to": [ 15.5, 0.0, 15.5 ],
-					"rotationOrigin": [ 14.5, 0.0, 13.5 ],
-					"rotationY": 180.0,
+					"from": [ 12.5, -7.0, 12.5 ],
+					"to": [ 14.5, 0.0, 16.5 ],
+					"rotationOrigin": [ 13.5, 0.0, 14.5 ],
+					"rotationY": 90.0,
 					"faces": {
 						"north": { "texture": "#material", "uv": [ 0.0, 2.0, 7.0, 4.0 ], "rotation": 90 },
 						"east": { "texture": "#material", "uv": [ 0.0, 0.0, 7.0, 4.0 ], "rotation": 90, "windMode": [-1,-1,-1,-1] },
