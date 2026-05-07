@@ -121,17 +121,17 @@
   "blockmaterial": "Ceramic",
   "resistance": 1.0,
   "lightAbsorption": 0,
-  "drops": [
-    {
-      "type": "item",
-      "code": "kilnshelf-ns",
-      "quantity": {
-        "avg": 1,
-        "var": 0
-      }
-    }
+  //"drops": [
+  //  {
+  //    "type": "item",
+  //    "code": "kilnshelf-north",
+  //    "quantity": {
+  //      "avg": 1,
+  //      "var": 0
+  //    }
+  //  }
 
-  ],
+  //],
   "sounds": {
     "walk": "walk/stone",
     "place": "block/ceramicplace"

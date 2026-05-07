@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -9,6 +10,9 @@ using Vintagestory.GameContent;
 namespace KilnShelves;
 public class KilnShelfRenderer: IRenderer
 {
+    /// <summary>
+    /// This whole IRenderer is essentially the GroundStorageRenderer with minor changes to make it work with kilnshelf blocks.
+    /// </summary>
     private readonly ICoreClientAPI capi;
     private readonly BlockEntityKilnShelf kilnShelf;
     public Matrixf ModelMat = new Matrixf();
@@ -42,14 +46,14 @@ public class KilnShelfRenderer: IRenderer
             UpdateTemps();
         }
 
-        if (!kilnShelf.UseRenderer || kilnShelf.Inventory.Empty || outOfRange || kilnShelf.StorageProps == null) return;
+        if (!kilnShelf.UseRenderer || kilnShelf.Inventory.Empty || outOfRange) return;
 
         var rpi = capi.Render;
         var camPos = capi.World.Player.Entity.CameraPos;
 
         var prog = rpi.PreparedStandardShader(kilnShelf.Pos.X, kilnShelf.Pos.Y, kilnShelf.Pos.Z);
 
-        var offs = new Vec3f[kilnShelf.DisplayedItems];
+        var offs = new Vec3f[kilnShelf.GetInvSlotCount()];
         kilnShelf.GetLayoutOffset(offs);
         var lightrgbs = capi.World.BlockAccessor.GetLightRGBs(kilnShelf.Pos.X, kilnShelf.Pos.Y, kilnShelf.Pos.Z);
         rpi.GlDisableCullFace();
@@ -70,13 +74,14 @@ public class KilnShelfRenderer: IRenderer
             var glowColor = ColorUtil.GetIncandescenceColorAsColor4f(itemTemps[index]);
             var gi = GameMath.Clamp((itemTemps[index] - 500) / 3, 0, 255);
 
+            //Modified from GroundStorageRenderer to work with shelf offsets
             ModelMat
                 .Identity()
                 .Translate(kilnShelf.Pos.X - camPos.X, kilnShelf.Pos.Y - camPos.Y, kilnShelf.Pos.Z - camPos.Z)
-                .Translate(0.5f, 0.5f, 0.5f)
-                .RotateY(kilnShelf.MeshAngle)
-                .Translate(-0.5f, -0.5f, -0.5f)
+                .Translate(0.5f, 0f, 0.5f)
+                .RotateYDeg(kilnShelf.Block.Shape.rotateY)
                 .Translate(offs[index].X, offs[index].Y, offs[index].Z)
+                .Translate(-1f, 0f, -1f)
                 ;
 
             var transform = kilnShelf.ModelTransformsRenderer[index];
@@ -113,6 +118,17 @@ public class KilnShelfRenderer: IRenderer
 
             rpi.RenderMultiTextureMesh(meshRef, "tex");
         }
+
+        //After all shelf contents are rendered, render the shelf itself
+        var shelfMesh = capi.TesselatorManager.GetDefaultBlockMeshRef(kilnShelf.Block);
+        ModelMat
+                .Identity()
+                .Translate(kilnShelf.Pos.X - camPos.X, kilnShelf.Pos.Y - camPos.Y, kilnShelf.Pos.Z - camPos.Z)
+                .Translate(0.5f, 0f, 0.5f)
+                .Translate(-0.5f, 0f, -0.5f)
+                ;
+        prog.ModelMatrix = ModelMat.Values;
+        rpi.RenderMultiTextureMesh(shelfMesh, "tex");
 
         prog.TempGlowMode = 0;
         prog.Stop();

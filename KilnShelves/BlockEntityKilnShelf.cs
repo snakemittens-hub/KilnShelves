@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -7,6 +8,7 @@ using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
+using Vintagestory.Client.NoObf;
 using Vintagestory.GameContent;
 
 namespace KilnShelves;
@@ -16,16 +18,20 @@ public interface IShelvable
     public EnumShelvableLayout? GetShelvableType(ItemStack stack) => EnumShelvableLayout.Quadrants;
     public ModelTransform? GetOnShelfTransform(ItemStack stack) => null;
 }
-//Use BEShelf inventory system but with Itemslot objects
-//BEBeehiveKiln uses UpdateGroundStorage(float hoursHeatReceived) as primary function
-//Required structure: BlockEntityGroundStorage groundStorage.inventory[index]
 public class BlockEntityKilnShelf : BlockEntityGroundStorage
 {
     protected override int invSlotCount => 8;
+    public virtual int GetInvSlotCount()
+    {
+        return invSlotCount;
+    }
     public override InventoryBase Inventory => inventory;
     public override string InventoryClassName => "kilnshelf";
     public override string AttributeTransformCode => "onshelfTransform";
     protected string GetSlotType(int slotid) => "shelf";
+    private KilnShelfRenderer renderer;
+    public new MultiTextureMeshRef[] MeshRefs = new MultiTextureMeshRef[8];
+    public new ModelTransform[] ModelTransformsRenderer = new ModelTransform[8];
     public BlockEntityKilnShelf()
     {
         inventory = new InventoryGeneric(invSlotCount, "shelf-0", null, (id, inv) => new ItemSlotDisplay(inv, GetSlotType(id)));
@@ -33,14 +39,41 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
     public override void Initialize(ICoreAPI api)
     {
         base.Initialize(api);
+        if (capi != null)
+        {
+            float temp = 0;
+            if (!Inventory.Empty)
+            {
+                int index = 0;
+                foreach (var slot in Inventory)
+                {
+                    if (slot.Itemstack is { } stack)
+                    {
+                        temp = Math.Max(temp, stack.Collectible.GetTemperature(capi.World, stack));
+
+                        if (stack.Class == EnumItemClass.Block && stack.Block is IBlockMealContainer be and not BlockCrock) // Crocks don't render the actual meal mesh
+                        {
+                            GetOrCreateMealMesh(be, stack, index);   // pre-generate any meal meshes during initialization, as these might have to be uploaded to the GPU
+                        }
+                    }
+
+                    index++;
+                }
+
+                if (temp >= 450)
+                {
+                    renderer = new KilnShelfRenderer(capi, this);
+                }
+            }
+        }
     }
 
     //////
     /// Code modified from BlockEntityGroundStorage
     //////
     public override void CheckInventoryClearedMidTick() { return; } //BEGroundStorage destroys entity if inventory is cleared. We do not want this behavior.
-    public new bool OnTryCreateKiln() { return false; }
-    protected override void UpdateLegacyStorageLayouts() { return; } //If left enabled causes weird behavior with slots getting shoved around
+    public new bool OnTryCreateKiln() { return false; } //Do not create kilns
+    protected override void UpdateLegacyStorageLayouts() { return; } //Disable weird behavior with slots getting shoved around
     public new void OnTransformed(IWorldAccessor worldAccessor, ITreeAttribute tree, int degreeRotation, Dictionary<int, AssetLocation> oldBlockIdMapping, Dictionary<int, AssetLocation> oldItemIdMapping, EnumAxis? flipAxis)
     { return; }
     public override void DetermineStorageProperties(ItemSlot sourceSlot) 
@@ -49,7 +82,7 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
 
         var StorageProps = this.StorageProps;
 
-        //this section being disabled breaks rendering of inventory completely.
+        //this section being disabled breaks inventory rendering even though we're not using StorageProps.
         if (!forceStorageProps)
         {
             if (StorageProps == null)
@@ -69,6 +102,22 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
             return inventory.Count;
         }
     }
+    public new void GetLayoutOffset(Vec3f[] offs)
+    {
+        for (int index = 0; index < invSlotCount; index++)
+        {
+            var shelvableType = GetShelvableLayout(inventory[index].Itemstack);
+
+            float x = ((index % 4) >= 2) ? 12 / 16f : 4 / 16f;
+            float y = index >= 4 ? 0.5f : 0f;
+            float z = (index % 2 == 0) ? 4 / 16f : 12 / 16f;
+
+            if (index is 0 or 4 && shelvableType is EnumShelvableLayout.SingleCenter) x = 0.5f;
+            if (index is 0 or 2 or 4 or 6 && shelvableType is EnumShelvableLayout.Halves or EnumShelvableLayout.SingleCenter) z = 0.5f;
+
+            offs[index] = new Vec3f(x, y, z);
+        }
+    }
 
     public override bool OnPlayerInteractStart(IPlayer player, BlockSelection bs)
     {
@@ -79,6 +128,58 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
         else if (GetShelvableLayout(slot.Itemstack) != null) return TryPut(player, bs);
 
         return false;
+    }
+    public override bool OnTesselation(ITerrainMeshPool mesher, ITesselatorAPI tesselator)
+    {
+        float temp = 0;
+        if (!Inventory.Empty)
+        {
+            foreach (var slot in Inventory)
+            {
+                temp = Math.Max(temp, slot.Itemstack?.Collectible.GetTemperature(capi.World, slot.Itemstack) ?? 0);
+            }
+        }
+
+        UseRenderer = temp >= 500;
+        // enable the renderer before we need it to avoid a frame where there is no mesh rendered (flicker)
+        if (renderer == null && temp >= 450)
+        {
+            capi.Event.EnqueueMainThreadTask(() =>
+            {
+                if (renderer == null)
+                {
+                    renderer = new KilnShelfRenderer(capi, this);
+                }
+            }, "kilnShelfRendererE");
+        }
+        if (UseRenderer)
+        {
+            updateMeshes();
+            return true;
+        }
+        // once the items cools down again we can remove the renderer
+        if (renderer != null && temp < 450)
+        {
+            capi.Event.EnqueueMainThreadTask(() =>
+            {
+                if (renderer != null)
+                {
+                    renderer.Dispose();
+                    renderer = null;
+                }
+            }, "kilnShelfRendererD");
+        }
+        NeedsRetesselation = false;
+        lock (inventoryLock)
+        {
+            return base.OnTesselation(mesher, tesselator);
+        }
+    }
+    protected override void Dispose()
+    {
+        base.Dispose();
+        renderer?.Dispose();
+        //ambientSound?.Stop();
     }
     //////
     ///End code modified from BEGroundStorage
@@ -316,22 +417,20 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
     {
         float[][] tfMatrices = new float[invSlotCount][];
 
-        for (int index = 0; index < invSlotCount; index++)
+        Vec3f[] offs = new Vec3f[DisplayedItems];
+        lock (inventoryLock)
         {
-            var shelvableType = GetShelvableLayout(inventory[index].Itemstack);
+            GetLayoutOffset(offs);
+        }
 
-            float x = ((index % 4) >= 2) ? 12 / 16f : 4 / 16f;
-            float y = index >= 4 ? 0.5f : 0f;
-            float z = (index % 2 == 0) ? 4 / 16f : 12 / 16f;
-
-            if (index is 0 or 4 && shelvableType is EnumShelvableLayout.SingleCenter) x = 0.5f;
-            if (index is 0 or 2 or 4 or 6 && shelvableType is EnumShelvableLayout.Halves or EnumShelvableLayout.SingleCenter) z = 0.5f;
-
-            tfMatrices[index] =
+        for (int i = 0; i < invSlotCount; i++)
+        {
+            Vec3f off = offs[i];
+            tfMatrices[i] =
                 new Matrixf()
                 .Translate(0.5f, 0, 0.5f)
                 .RotateYDeg(Block.Shape.rotateY)
-                .Translate(x - 0.5f, y, z - 0.5f)
+                .Translate(off.X - 0.5f, off.Y, off.Z - 0.5f)
                 .Translate(-0.5f, 0, -0.5f)
                 .Values
             ;
@@ -476,14 +575,25 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
     //////
 
     //////
-    ///Code imported from BEContainerDisplay to undo BEGroundStorage override
+    ///Code imported/modified from BEContainerDisplay to bypass BEGroundStorage override
     //////
     protected override MeshData getOrCreateMesh(ItemSlot slot, int index)
     {
+        var stack = slot.Itemstack;
+        if (stack.Class == EnumItemClass.Block)
+        {
+            if (stack.Block is IBlockMealContainer be and not BlockCrock) // Crocks don't render the actual meal mesh
+            {
+                GetOrCreateMealMesh(be, stack, index);
+            }
+            else
+            {
+                MeshRefs[index] = capi.TesselatorManager.GetDefaultBlockMeshRef(stack.Block);
+            }
+        }
+
         MeshData mesh = getMesh(slot);
         if (mesh != null) return mesh;
-
-        var stack = slot.Itemstack;
         CompositeShape customShape = stack.Collectible.Attributes?["displayedShape"].AsObject<CompositeShape>(null, stack.Collectible.Code.Domain);
         if (customShape != null)
         {
@@ -515,6 +625,16 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
 
         string key = getMeshCacheKey(slot);
         MeshCache[key] = mesh;
+
+        if (stack.Collectible.Attributes?[AttributeTransformCode].Exists == true)
+        {
+            var transform = stack.Collectible.Attributes?[AttributeTransformCode].AsObject<ModelTransform>();
+            ModelTransformsRenderer[index] = transform;
+        }
+        else
+        {
+            ModelTransformsRenderer[index] = null;
+        }
 
         return mesh;
     }
