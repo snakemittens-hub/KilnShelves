@@ -118,17 +118,6 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
             offs[index] = new Vec3f(x, y, z);
         }
     }
-
-    public override bool OnPlayerInteractStart(IPlayer player, BlockSelection bs)
-    {
-        ItemSlot slot = player.InventoryManager.ActiveHotbarSlot;
-
-        if (TryUse(player, bs)) return true;
-        else if (slot.Empty) return TryTake(player, bs);
-        else if (GetShelvableLayout(slot.Itemstack) != null) return TryPut(player, bs);
-
-        return false;
-    }
     public override bool OnTesselation(ITerrainMeshPool mesher, ITesselatorAPI tesselator)
     {
         float temp = 0;
@@ -175,6 +164,16 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
             return base.OnTesselation(mesher, tesselator);
         }
     }
+    public override bool OnPlayerInteractStart(IPlayer player, BlockSelection bs)
+    {
+        ItemSlot slot = player.InventoryManager.ActiveHotbarSlot;
+
+        if (TryUse(player, bs)) return true;
+        else if (slot.Empty) return TryTake(player, bs);
+        else if (GetShelvableLayout(slot.Itemstack) != null) return TryPut(player, bs);
+
+        return false;
+    }
     protected override void Dispose()
     {
         base.Dispose();
@@ -212,7 +211,9 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
         if (stack == null) return false;
 
         var obj = stack.Collectible;
-        bool top = blockSel.SelectionBoxIndex == 4;
+        if (blockSel.SelectionBoxIndex == 4){
+            return false;
+        }
 
         bool up = blockSel.SelectionBoxIndex > 1;
         bool left = (blockSel.SelectionBoxIndex % 2) == 0;
@@ -248,6 +249,12 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
 
     public bool CanPlace(ItemStack? stack, BlockSelection blockSel, out bool canTake)
     {
+        if (blockSel.SelectionBoxIndex == 4)
+        {
+            canTake = false;
+            return false;
+        }
+
         bool up = blockSel.SelectionBoxIndex > 1;
         bool left = (blockSel.SelectionBoxIndex % 2) == 0;
 
@@ -277,6 +284,11 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
 
     private bool TryUse(IPlayer player, BlockSelection blockSel)
     {
+        if (blockSel.SelectionBoxIndex == 4)
+        {
+            return false;
+        }
+
         bool up = blockSel.SelectionBoxIndex > 1;
         bool left = (blockSel.SelectionBoxIndex % 2) == 0;
         var shelvableLayout = GetShelvableLayout(inventory[up ? 4 : 0].Itemstack);
@@ -308,6 +320,11 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
 
     private bool TryPut(IPlayer byPlayer, BlockSelection blockSel)
     {
+        if (blockSel.SelectionBoxIndex == 4)
+        {
+            return false;
+        }
+
         var heldSlot = byPlayer.InventoryManager.ActiveHotbarSlot;
 
         bool up = blockSel.SelectionBoxIndex > 1;
@@ -372,6 +389,11 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
 
     private bool TryTake(IPlayer byPlayer, BlockSelection blockSel)
     {
+        if (blockSel.SelectionBoxIndex == 4)
+        {
+            return false;
+        }
+
         bool up = blockSel.SelectionBoxIndex > 1;
         bool left = (blockSel.SelectionBoxIndex % 2) == 0;
         var shelvableLayout = GetShelvableLayout(inventory[up ? 4 : 0].Itemstack);
@@ -575,7 +597,7 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
     //////
 
     //////
-    ///Code imported/modified from BEContainerDisplay to bypass BEGroundStorage override
+    ///Code imported/modified from BEContainerDisplay to bypass  BEGroundStorage override
     //////
     protected override MeshData getOrCreateMesh(ItemSlot slot, int index)
     {

@@ -1,0 +1,72 @@
+{
+	"editor": {
+		"allAngles": false,
+		"entityTextureMode": false
+	},
+	"textureWidth": 16,
+	"textureHeight": 16,
+	"textureSizes": {
+	},
+	"textures": {
+		"material": "game:block/clay/brickpile/burned/fire-brick1"
+	},
+	"elements": [
+		{
+			"name": "brick",
+			"from": [ 6.0, 0.0, 6.0 ],
+			"to": [ 7.0, 7.0, 10.0 ],
+			"rotationOrigin": [ 6.5, 7.0, 8.0 ],
+			"faces": {
+				"north": { "texture": "#material", "uv": [ 8.5, 0.0, 15.5, 1.0 ], "rotation": 90 },
+				"east": { "texture": "#material", "uv": [ 8.5, 4.0, 15.5, 8.0 ], "rotation": 90, "windMode": [-1,-1,-1,-1] },
+				"south": { "texture": "#material", "uv": [ 8.5, 5.0, 15.5, 6.0 ], "rotation": 90, "windMode": [-1,-1,-1,-1] },
+				"west": { "texture": "#material", "uv": [ 8.5, 4.0, 15.5, 8.0 ], "rotation": 90, "windMode": [-1,-1,-1,-1] },
+				"up": { "texture": "#material", "uv": [ 14.0, 12.0, 15.0, 16.0 ] },
+				"down": { "texture": "#material", "uv": [ 13.0, 12.0, 14.0, 16.0 ] }
+			},
+			"children": [
+				{
+					"name": "brick3",
+					"from": [ 0.0, 7.0, 0.0 ],
+					"to": [ 0.5, 7.5, 4.0 ],
+					"rotationOrigin": [ 0.5, 14.0, 2.0 ],
+					"faces": {
+						"north": { "texture": "#material", "uv": [ 8.5, 0.0, 9.0, 0.5 ], "rotation": 90 },
+						"east": { "texture": "#material", "uv": [ 8.5, 4.0, 9.0, 8.0 ], "rotation": 90, "windMode": [-1,-1,-1,-1] },
+						"south": { "texture": "#material", "uv": [ 8.5, 5.0, 9.0, 5.5 ], "rotation": 90, "windMode": [-1,-1,-1,-1] },
+						"west": { "texture": "#material", "uv": [ 8.5, 4.0, 9.0, 8.0 ], "rotation": 90, "windMode": [-1,-1,-1,-1] },
+						"up": { "texture": "#material", "uv": [ 14.0, 12.0, 14.5, 16.0 ] },
+						"down": { "texture": "#material", "uv": [ 13.0, 12.0, 13.5, 16.0 ] }
+					}
+				},
+				{
+					"name": "brick2",
+					"from": [ 1.0, 0.0, 0.0 ],
+					"to": [ 4.0, 7.0, 1.0 ],
+					"rotationOrigin": [ 2.5, 7.0, 0.5 ],
+					"faces": {
+						"north": { "texture": "#material", "uv": [ 8.5, 1.0, 15.5, 4.0 ], "rotation": 90 },
+						"east": { "texture": "#material", "uv": [ 8.5, 4.5, 15.5, 5.5 ], "rotation": 90, "windMode": [-1,-1,-1,-1] },
+						"south": { "texture": "#material", "uv": [ 8.5, 0.0, 15.5, 3.0 ], "rotation": 90, "windMode": [-1,-1,-1,-1] },
+						"west": { "texture": "#material", "uv": [ 8.5, 5.0, 15.5, 6.0 ], "rotation": 90, "windMode": [-1,-1,-1,-1] },
+						"up": { "texture": "#material", "uv": [ 12.5, 12.5, 15.5, 13.5 ] },
+						"down": { "texture": "#material", "uv": [ 12.5, 13.0, 15.5, 14.0 ] }
+					}
+				},
+				{
+					"name": "brick4",
+					"from": [ 0.5, 7.0, 0.0 ],
+					"to": [ 4.0, 7.5, 0.5 ],
+					"rotationOrigin": [ 2.5, 14.0, 0.5 ],
+					"faces": {
+						"north": { "texture": "#material", "uv": [ 8.5, 0.5, 9.0, 4.0 ], "rotation": 90 },
+						"east": { "texture": "#material", "uv": [ 8.5, 4.5, 9.0, 5.0 ], "rotation": 90, "windMode": [-1,-1,-1,-1] },
+						"south": { "texture": "#material", "uv": [ 8.5, 0.0, 9.0, 3.5 ], "rotation": 90, "windMode": [-1,-1,-1,-1] },
+						"west": { "texture": "#material", "uv": [ 8.5, 5.0, 9.0, 5.5 ], "rotation": 90, "windMode": [-1,-1,-1,-1] },
+						"up": { "texture": "#material", "uv": [ 12.5, 12.5, 16.0, 13.0 ] },
+						"down": { "texture": "#material", "uv": [ 12.5, 13.0, 16.0, 13.5 ] }
+					}
+				}
+			]
+		}
+	]}

@@ -2,13 +2,10 @@
     "$schema": "https://moddbcdn.vintagestory.at/schema/modinfo.latest.json",
     "type": "Code",
     "modid": "kilnshelves",
-    "name": "KilnShelves",
+    "name": "Stackable Kiln Shelves",
     "authors": [
         "SnakeMittens"
     ],
-    "description": "To be added",
-    "version": "1.0.0",
-    "dependencies": {
-        "game": "1.22.0"
-    }
+    "description": "Stack more fireable pottery in the beehive kiln",
+    "version": "1.0.0"
 }

@@ -114,32 +114,13 @@ public class BlockKilnShelf : Block
     {
         return true;
     }
-    //public override bool CanAttachBlockAt(IBlockAccessor blockAccessor, Block block, BlockPos pos, BlockFacing blockFace, Cuboidi attachmentArea = null)
-    //{
-    //    var be = blockAccessor.GetBlockEntity<BlockEntityKilnShelf>(pos);
-    //    if (be != null)
-    //    {
-    //        return be.CanAttachBlockAt(blockFace, attachmentArea);
-    //    }
-    //    return base.CanAttachBlockAt(blockAccessor, block, pos, blockFace, attachmentArea);
-    //}
-
-
     public override bool OnBlockInteractStart(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel)
     {
-        Block block = world.BlockAccessor.GetBlock(blockSel.Position);
-        //this.Api.Logger.Debug("Block code: " + block.Code);
-
+        bool result;
         if (world.BlockAccessor.GetBlockEntity(blockSel.Position) is BlockEntityKilnShelf bekshelf) 
         {
-            //for (int index = 0; index < 8; index++)
-            //{
-            //    if (bekshelf.Inventory[index].Itemstack?.Collectible.Code != null)
-            //    {
-            //        this.Api.World.Logger.Audit("BEKilnShelf Index {1}: {2}", index, bekshelf.Inventory[index].Itemstack?.Collectible.Code);
-            //    }
-            //}
-            return bekshelf.OnPlayerInteractStart(byPlayer, blockSel);
+            result = bekshelf.OnPlayerInteractStart(byPlayer, blockSel);
+            if (result){return result;}
         }
         return base.OnBlockInteractStart(world, byPlayer, blockSel);
     }

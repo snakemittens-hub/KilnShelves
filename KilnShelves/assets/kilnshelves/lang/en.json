@@ -1,3 +1,8 @@
 {
-    "game:block-kilnshelf*": "Kiln Shelves"
+  "game:block-kilnshelf-*": "Kiln shelves",
+  "game:block-kilnshelfhalf-*": "Kiln shelf",
+  "kilnshelves:block-kilnplate-fired": "Kiln shelf plate",
+  "kilnshelves:block-kilnplate-raw": "Raw kiln shelf plate",
+  "kilnshelves:block-kilnsupport-fire-fired": "Kiln shelf support",
+  "kilnshelves:block-kilnsupport-fire-raw": "Raw kiln shelf support"
 }

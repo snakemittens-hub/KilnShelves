@@ -9,8 +9,8 @@
       "cokeovendoor-*": 4,
       "refractorybrickgrating-good-*": 5,
       "@(air|refractorybrickgrating-good-.*)": 6,
-      "@(air|groundstorage|refractorybrickgrating-good-.*|kilnshelf-.*)": 7,
-      "@(air|groundstorage|kilnshelf-.*)": 8
+      "@(air|groundstorage|refractorybrickgrating-good-.*|kilnshelf.*)": 7,
+      "@(air|groundstorage|kilnshelf.*)": 8
     },
     "file": "game:blocktypes/clay/door-kiln.json",
     "side": "Server"

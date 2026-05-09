@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using Vintagestory.API.Client;
@@ -128,6 +129,11 @@ public class KilnShelfRenderer: IRenderer
                 .Translate(-0.5f, 0f, -0.5f)
                 ;
         prog.ModelMatrix = ModelMat.Values;
+
+        //make shelf glow same color as hottest item in inventory
+        var shelfGlowColor = ColorUtil.GetIncandescenceColorAsColor4f(itemTemps.Max());
+        var shelfgi = GameMath.Clamp((itemTemps.Max() - 500) / 3, 0, 255);
+        prog.RgbaGlowIn = new Vec4f(shelfGlowColor[0], shelfGlowColor[1], shelfGlowColor[2], shelfgi/255f);
         rpi.RenderMultiTextureMesh(shelfMesh, "tex");
 
         prog.TempGlowMode = 0;
