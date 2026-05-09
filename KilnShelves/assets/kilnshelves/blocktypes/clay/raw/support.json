@@ -93,8 +93,6 @@
     "general": [ "kilnsupport-{color}-raw" ],
     "kilnshelves": [ "*" ]
   },
-  //"heldTpIdleAnimation": "holdbothhands",
-  //"heldTpUseAnimation": "twohandplaceblock",
   "replaceable": 400,
   "resistance": 1.5,
   "maxStackSize": 16,

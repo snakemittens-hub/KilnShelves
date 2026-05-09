@@ -1,7 +1,7 @@
 ﻿{
   "ingredient": {
     "type": "item",
-    "code": "clay-*",
+    "code": "game:clay-*",
     "name": "color",
     "allowedVariants": [ "fire" ]
   },
@@ -24,9 +24,9 @@
       "###############"
     ]
   ],
-  "name": "Kiln Shelf Plate",
+  "name": "recipe-kiln-shelf-plate",
   "output": {
     "type": "block",
-    "code": "kilnplate-raw"
+    "code": "kilnshelves:kilnplate-raw"
   }
 }
