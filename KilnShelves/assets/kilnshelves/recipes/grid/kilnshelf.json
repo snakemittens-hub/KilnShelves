@@ -1,0 +1,54 @@
+﻿[
+	{
+		"ingredientPattern": "SPS",
+		"ingredients": {
+			"S": {
+				"type": "block",
+				"code": "kilnshelves:kilnsupport-fire-fired",
+				"quantity": 2
+			},
+			"P": {
+				"type": "block",
+				"code": "kilnshelves:kilnplate-fired"
+			}
+		},
+		"width": 3,
+		"height": 1,
+		"output": {
+			"type": "block",
+			"code": "game:kilnshelf-north"
+		}
+	},
+	{
+		"ingredientPattern": "F",
+		"ingredients": {
+			"F": {
+				"type": "block",
+				"code": "game:kilnshelffull-*"
+			}
+		},
+		"width": 1,
+		"height": 1,
+		"output": {
+			"type": "block",
+			"code": "game:kilnshelf-north",
+			"quantity": 2
+		}
+	},
+	{
+		"ingredientPattern": "H	H",
+		"ingredients": {
+			"H": {
+				"type": "block",
+				"code": "game:kilnshelf-*"
+			}
+		},
+		"width": 1,
+		"height": 2,
+		"output": {
+			"type": "block",
+			"code": "game:kilnshelffull-north",
+			"quantity": 1
+		}
+	}
+]

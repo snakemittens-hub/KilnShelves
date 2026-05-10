@@ -2,9 +2,27 @@
   "code": "kilnshelf",
   "class": "BlockKilnShelf",
   "entityClass": "BEKilnShelf",
+  "drops": [
+    {
+      "type": "block",
+      "code": "kilnshelves:kilnplate-fired",
+      "quantity": {
+        "avg": 1,
+        "var": 0
+      }
+    },
+    {
+      "type": "block",
+      "code": "kilnshelves:kilnsupport-fire-fired",
+      "quantity": {
+        "avg": 4,
+        "var": 0
+      }
+    }
+  ],
   "behaviors": [
     {
-      "name": "UnstableFalling"
+      "name": "Unstable"
     },
     {
       "name": "HorizontalOrientable"
@@ -25,21 +43,29 @@
   ],
   "shapebytype": {
     "*-north": {
-      "base": "block/clay/kilnshelf",
+      "base": "block/clay/kilnshelfhalf",
       "rotateY": 0
     },
     "*-west": {
-      "base": "block/clay/kilnshelf",
+      "base": "block/clay/kilnshelfhalf",
       "rotateY": 90
     },
     "*-south": {
-      "base": "block/clay/kilnshelf",
+      "base": "block/clay/kilnshelfhalf",
       "rotateY": 180
     },
     "*-east": {
-      "base": "block/clay/kilnshelf",
+      "base": "block/clay/kilnshelfhalf",
       "rotateY": 270
     }
+  },
+  "collisionbox": {
+    "x1": 0,
+    "y1": 0,
+    "z1": 0,
+    "x2": 1,
+    "y2": 0.625,
+    "z2": 1
   },
   "selectionboxes": [
     {
@@ -97,44 +123,24 @@
         "*-west": 90,
         "*-south": 180
       }
-    },
-    {
-      "x1": 0,
-      "y1": 0.9375,
-      "z1": 0,
-      "x2": 1,
-      "y2": 1,
-      "z2": 1
     }
   ],
   "maxStackSize": 32,
   "sidesolid": {
-    "up": true,
     "all": false
   },
   "sideopaque": {
     "all": false
   },
   "blockmaterial": "Ceramic",
-  "resistance": 1.5,
+  "resistance": 1.0,
   "lightAbsorption": 0,
-  //"drops": [
-  //  {
-  //    "type": "item",
-  //    "code": "kilnshelf-north",
-  //    "quantity": {
-  //      "avg": 1,
-  //      "var": 0
-  //    }
-  //  }
-
-  //],
   "sounds": {
     "walk": "walk/stone",
     "place": "block/ceramicplace"
   },
   "creativeinventory": {
     "general": [ "*-north" ],
-    "kilnshelves": [ "*" ]
+    "kilnshelves": [ "*-north" ]
   }
 }

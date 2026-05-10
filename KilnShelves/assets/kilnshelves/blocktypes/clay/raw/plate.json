@@ -25,7 +25,6 @@
 	},
 	"attributes": {
 		"tempGlowMode": 1,
-		"shelvable": "SingleCenter",
 		"onTongTransform": {
 			"translation": {
 				"x": -1.7,

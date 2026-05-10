@@ -15,6 +15,8 @@ namespace KilnShelves
         {
             api.RegisterBlockClass("BlockKilnShelf", typeof(BlockKilnShelf));
             api.RegisterBlockEntityClass("BEKilnShelf", typeof(BlockEntityKilnShelf));
+            api.RegisterCollectibleBehaviorClass("kilnshelves.Offhand", typeof(CollectibleBehaviorOffhand));
+            api.RegisterCollectibleBehaviorClass("kilnshelves.StackShelf", typeof(CollectibleBehaviorStackShelf));
         }
 
         public override void StartServerSide(ICoreServerAPI api)

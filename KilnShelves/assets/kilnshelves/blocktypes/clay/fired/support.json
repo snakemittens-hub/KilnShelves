@@ -4,20 +4,28 @@
     {
       "name": "GroundStorable",
       "properties": {
-        "layout": "Quadrants",
-        "placeRemoveSound": "sounds/player/build",
+        "layout": "Stacking",
+        "upsolid": false,
+        "placeRemoveSound": "game:sounds/player/build",
+        "stackingmodel": "block/clay/supportpile",
         "collisionBox": {
           "x1": 0,
           "y1": 0,
           "z1": 0,
           "x2": 1,
-          "y2": 0.5,
+          "y2": 0.125,
           "z2": 1
-        }
+        },
+        "cbScaleYByLayer": 0.25,
+        "modelItemsToStackSizeRatio": 4,
+        "stackingCapacity": 32,
+        "transferQuantity": 1,
+        "bulkTransferQuantity": 4
       }
     },
-    { "name": "Unplaceable" }, // The ground storable obsoletes this being a block. Should be an item, but is kept a block for backwards compatibility
-    { "name": "RightClickPickup" }
+    { "name": "Unplaceable" },
+    { "name": "RightClickPickup" },
+    { "name": "kilnshelves.Offhand" } //Thanks to tui_smuggler
   ],
   "variantgroups": [
     {
@@ -34,6 +42,7 @@
     "material": { "base": "game:block/clay/brickpile/burned/fire-brick1" }
   },
   "attributes": {
+    "validKilnShelfSupport": true,
     "tempGlowMode": 1,
     "shelvable": true,
     "onTongTransform": {
@@ -80,7 +89,7 @@
   "blockmaterial": "Ceramic",
   "creativeinventory": {
     "general": [ "kilnsupport-{color}-fired" ],
-    "decorative": [ "*" ]
+    "kilnshelves": [ "*" ]
   },
   "replaceable": 400,
   "resistance": 1.5,
@@ -137,14 +146,32 @@
       "z": -0.52
     },
     "rotation": {
-      "x": -139,
-      "y": -21,
-      "z": -118
+      "x": -180,
+      "y": -10,
+      "z": -98
     },
     "origin": {
       "x": 0.5,
-      "y": 0.01,
-      "z": 0.5
+      "y": 0,
+      "z": 0.35
+    },
+    "scale": 0.81
+  },
+  "tpOffHandTransform": {
+    "translation": {
+      "x": -0.56,
+      "y": -0.03,
+      "z": -0.52
+    },
+    "rotation": {
+      "x": 89,
+      "y": 4,
+      "z": -98
+    },
+    "origin": {
+      "x": 0.59,
+      "y": -0.1,
+      "z": 0.31
     },
     "scale": 0.81
   }

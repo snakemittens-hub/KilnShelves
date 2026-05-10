@@ -1,8 +1,14 @@
 {
-  "game:block-kilnshelf-*": "Kiln shelves",
-  "game:block-kilnshelfhalf-*": "Kiln shelf",
+  "game:block-kilnshelffull-*": "Kiln shelves",
+  "game:block-kilnshelf-*": "Kiln shelf",
+  "game:blockdesc-kilnshelf*": "Place in a beehive kiln to fit more raw pottery.\nMod: Stackable Kiln Shelves",
+  "game:block-handbooktitle-kilnshelf*": "Gridless Crafting:",
+  "game:block-handbooktext-kilnshelf*": "Four <a href=\"handbook://block-kilnshelves:kilnsupport-fire-fired\">kiln shelf supports</a> in the offhand and one <a href=\"handbook://block-kilnshelves:kilnplate-fired\">kiln shelf plate</a> in the mainhand can be used to place a new kiln shelf or upgrade an existing one.",
+  
+  "kilnshelves:blockdesc-kilnplate-fired": "Used with kiln shelf supports to build kiln shelves.",
   "kilnshelves:block-kilnplate-fired": "Kiln shelf plate",
   "kilnshelves:block-kilnplate-raw": "Raw kiln shelf plate",
   "kilnshelves:block-kilnsupport-fire-fired": "Kiln shelf support",
+  "kilnshelves:blockdesc-kilnsupport-fire-fired": "Used with a kiln shelf plate to build kiln shelves.",
   "kilnshelves:block-kilnsupport-fire-raw": "Raw kiln shelf support"
 }
