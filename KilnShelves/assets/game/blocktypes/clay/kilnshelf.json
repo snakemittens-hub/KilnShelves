@@ -2,24 +2,44 @@
   "code": "kilnshelf",
   "class": "BlockKilnShelf",
   "entityClass": "BEKilnShelf",
-  "drops": [
-    {
-      "type": "block",
-      "code": "kilnshelves:kilnplate-fired",
-      "quantity": {
-        "avg": 1,
-        "var": 0
+  "dropsByType": {
+    "*-good-*": [
+      {
+        "type": "block",
+        "code": "kilnshelves:kilnplate-fired",
+        "quantity": {
+          "avg": 1,
+          "var": 0
+        }
+      },
+      {
+        "type": "block",
+        "code": "kilnshelves:kilnsupport-fire-fired",
+        "quantity": {
+          "avg": 4,
+          "var": 0
+        }
       }
-    },
-    {
-      "type": "block",
-      "code": "kilnshelves:kilnsupport-fire-fired",
-      "quantity": {
-        "avg": 4,
-        "var": 0
+    ],
+    "*-damaged-*": [
+      {
+        "type": "block",
+        "code": "kilnshelves:kilnplate-fired",
+        "quantity": {
+          "avg": 0.5,
+          "var": 0.5
+        }
+      },
+      {
+        "type": "block",
+        "code": "kilnshelves:kilnsupport-fire-fired",
+        "quantity": {
+          "avg": 2.5,
+          "var": 0.5
+        }
       }
-    }
-  ],
+    ]
+  },
   "behaviors": [
     {
       "name": "Unstable"
@@ -33,14 +53,54 @@
     "handbook": {
       "groupBy": [ "kilnshelf*" ]
     },
-    "heatResistance": 0.9
+    "heatResistance": 0.8
   },
   "variantgroups": [
+    {
+      "code": "state",
+      "states": [ "good", "damaged" ]
+    },
     {
       "code": "side",
       "loadFromProperties": "abstract/horizontalorientation"
     }
   ],
+  "texturesByType": {
+    "*-good-*": {
+      "material": { "base": "block/clay/brickpile/burned/fire-brick1" },
+      "fire": { "base": "block/clay/hardened/fire" }
+    },
+    "*-damaged-*": {
+      "material": {
+        "base": "block/clay/brickpile/burned/fire-brick1",
+        "overlays": [ "block/overlay/cracked/cracked1" ],
+        "alternates": [
+          {
+            "base": "block/clay/brickpile/burned/fire-brick1",
+            "overlays": [ "block/overlay/cracked/cracked2" ]
+          },
+          {
+            "base": "block/clay/brickpile/burned/fire-brick1",
+            "overlays": [ "block/overlay/cracked/cracked3" ]
+          }
+        ]
+      },
+      "fire": {
+        "base": "block/clay/hardened/fire",
+        "overlays": [ "block/overlay/cracked/cracked1" ],
+        "alternates": [
+          {
+            "base": "block/clay/hardened/fire",
+            "overlays": [ "block/overlay/cracked/cracked2" ]
+          },
+          {
+            "base": "block/clay/hardened/fire",
+            "overlays": [ "block/overlay/cracked/cracked3" ]
+          }
+        ]
+      }
+    }
+  },
   "shapebytype": {
     "*-north": {
       "base": "block/clay/kilnshelfhalf",

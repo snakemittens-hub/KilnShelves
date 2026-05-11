@@ -16,7 +16,7 @@
 		"height": 1,
 		"output": {
 			"type": "block",
-			"code": "game:kilnshelf-north"
+			"code": "game:kilnshelf-good-north"
 		}
 	},
 	{
@@ -31,7 +31,7 @@
 		"height": 1,
 		"output": {
 			"type": "block",
-			"code": "game:kilnshelf-north",
+			"code": "game:kilnshelf-good-north",
 			"quantity": 2
 		}
 	},
@@ -47,7 +47,7 @@
 		"height": 2,
 		"output": {
 			"type": "block",
-			"code": "game:kilnshelffull-north",
+			"code": "game:kilnshelffull-good-north",
 			"quantity": 1
 		}
 	}

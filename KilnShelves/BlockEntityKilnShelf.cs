@@ -321,9 +321,11 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
     private bool TryPut(IPlayer byPlayer, BlockSelection blockSel)
     {
         if (blockSel.SelectionBoxIndex == 4)
-        {
             return false;
-        }
+
+        Block block = Api.World.BlockAccessor.GetBlock(blockSel.Position);
+        if (block.Code.ToString().Contains("damaged"))
+            return false;
 
         var heldSlot = byPlayer.InventoryManager.ActiveHotbarSlot;
 
@@ -390,9 +392,7 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
     private bool TryTake(IPlayer byPlayer, BlockSelection blockSel)
     {
         if (blockSel.SelectionBoxIndex == 4)
-        {
             return false;
-        }
 
         bool up = blockSel.SelectionBoxIndex > 1;
         bool left = (blockSel.SelectionBoxIndex % 2) == 0;
