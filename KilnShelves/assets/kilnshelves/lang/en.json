@@ -10,5 +10,7 @@
   "kilnshelves:block-kilnplate-raw": "Raw kiln shelf plate",
   "kilnshelves:block-kilnsupport-fire-fired": "Kiln shelf support",
   "kilnshelves:blockdesc-kilnsupport-fire-fired": "Used with a kiln shelf plate to build kiln shelves.",
-  "kilnshelves:block-kilnsupport-fire-raw": "Raw kiln shelf support"
+  "kilnshelves:block-kilnsupport-fire-raw": "Raw kiln shelf support",
+
+  "tabname-kilnshelves": "Stackable Kiln Shelves"
 }
