@@ -81,14 +81,16 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
         var StorageProps = this.StorageProps;
 
         //this section being disabled breaks inventory rendering even though we're not using StorageProps.
-        if (!forceStorageProps)
+        if (StorageProps == null)
         {
-            if (StorageProps == null)
-            {
-                if (sourceStack == null) return;
+            if (sourceStack == null) return;
 
-                StorageProps = this.StorageProps = sourceStack.Collectible?.GetBehavior<CollectibleBehaviorGroundStorable>()?.StorageProps;
-            }
+            StorageProps = this.StorageProps = sourceStack.Collectible?.GetBehavior<CollectibleBehaviorGroundStorable>()?.StorageProps;
+
+            //if (StorageProps == null)
+            //{
+            //    StorageProps = this.StorageProps = GroundStor
+            //}
         }
 
         if (StorageProps == null) return;  // Seems necessary to avoid crash with certain items placed in game version 1.15-pre.1?
@@ -166,28 +168,11 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
     {
         ItemSlot slot = player.InventoryManager.ActiveHotbarSlot;
 
-        if (TryUse(player, bs)) return true;
-        else if (slot.Empty) return TryTake(player, bs);
+        if (slot.Empty) return TryTake(player, bs);
         else if (GetShelvableLayout(slot.Itemstack) != null) return TryPut(player, bs);
 
         return false;
     }
-    //public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
-    //{
-    //    Pos = new BlockPos(
-    //        tree.GetInt("posx"),
-    //        tree.GetInt("posy"),
-    //        tree.GetInt("posz")
-    //    );
-
-    //    foreach (var val in Behaviors)
-    //    {
-    //        val.FromTreeAttributes(tree, worldAccessForResolve);
-    //    }
-
-    //    if (worldAccessForResolve.Side == EnumAppSide.Server && Block.IsMissing) missingBlockTree = tree;
-    //}
-    //private ITreeAttribute missingBlockTree = null;
     protected override void Dispose()
     {
         base.Dispose();
@@ -296,42 +281,6 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
         return canPlace;
     }
 
-    private bool TryUse(IPlayer player, BlockSelection blockSel)
-    {
-        if (blockSel.SelectionBoxIndex == 4)
-        {
-            return false;
-        }
-
-        bool up = blockSel.SelectionBoxIndex > 1;
-        bool left = (blockSel.SelectionBoxIndex % 2) == 0;
-        var shelvableLayout = GetShelvableLayout(inventory[up ? 4 : 0].Itemstack);
-        if (shelvableLayout is not EnumShelvableLayout.SingleCenter)
-        {
-            if (!left) shelvableLayout = GetShelvableLayout(inventory[up ? 6 : 2].Itemstack);
-        }
-
-        int start = (up ? 4 : 0) + (shelvableLayout is EnumShelvableLayout.SingleCenter ? 0 : (left ? 0 : 2));
-        int end = start + (shelvableLayout is EnumShelvableLayout.Halves or EnumShelvableLayout.SingleCenter ? 1 : 2);
-
-        if (player.Entity.Controls.ShiftKey) return false;
-
-        for (int i = end - 1; i >= start; i--)
-        {
-            var collIci = inventory[i].Itemstack?.Collectible.GetCollectibleInterface<IContainedInteractable>();
-            if (collIci != null)
-            {
-                if (collIci.OnContainedInteractStart(this, inventory[i], player, blockSel))
-                {
-                    MarkDirty();
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
     private bool TryPut(IPlayer byPlayer, BlockSelection blockSel)
     {
         if (blockSel.SelectionBoxIndex == 4)
@@ -386,6 +335,7 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
 
             if (moved > 0)
             {
+                DetermineStorageProperties(inventory[i]); //Need to determine StorageProps at some point or else we get null value errors.
                 Api.World.PlaySoundAt(inventory[i].Itemstack?.Block?.Sounds?.Place ?? GlobalConstants.DefaultBuildSound, byPlayer.Entity, byPlayer);
                 Api.World.Logger.Audit("{0} Put 1x{1} into Kiln shelf index {3} at {2}.",
                     byPlayer.PlayerName,
@@ -611,7 +561,7 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
     //////
 
     //////
-    ///Code imported/modified from BEContainerDisplay to bypass  BEGroundStorage override
+    ///Code imported/modified from BEContainerDisplay to bypass BEGroundStorage override
     //////
     protected override MeshData getOrCreateMesh(ItemSlot slot, int index)
     {
