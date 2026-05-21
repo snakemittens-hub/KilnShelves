@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -8,7 +7,6 @@ using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
-using Vintagestory.Client.NoObf;
 using Vintagestory.GameContent;
 
 namespace KilnShelves;
@@ -174,6 +172,22 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
 
         return false;
     }
+    //public override void FromTreeAttributes(ITreeAttribute tree, IWorldAccessor worldAccessForResolve)
+    //{
+    //    Pos = new BlockPos(
+    //        tree.GetInt("posx"),
+    //        tree.GetInt("posy"),
+    //        tree.GetInt("posz")
+    //    );
+
+    //    foreach (var val in Behaviors)
+    //    {
+    //        val.FromTreeAttributes(tree, worldAccessForResolve);
+    //    }
+
+    //    if (worldAccessForResolve.Side == EnumAppSide.Server && Block.IsMissing) missingBlockTree = tree;
+    //}
+    //private ITreeAttribute missingBlockTree = null;
     protected override void Dispose()
     {
         base.Dispose();
@@ -373,7 +387,7 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
             if (moved > 0)
             {
                 Api.World.PlaySoundAt(inventory[i].Itemstack?.Block?.Sounds?.Place ?? GlobalConstants.DefaultBuildSound, byPlayer.Entity, byPlayer);
-                Api.World.Logger.Audit("{0} Put 1x{1} into Shelf index {3} at {2}.",
+                Api.World.Logger.Audit("{0} Put 1x{1} into Kiln shelf index {3} at {2}.",
                     byPlayer.PlayerName,
                     inventory[i].Itemstack?.Collectible.Code,
                     Pos,
@@ -420,7 +434,7 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
             {
                 Api.World.SpawnItemEntity(stack, Pos);
             }
-            Api.World.Logger.Audit("{0} Took 1x{1} from Shelf index {3} at {2}.",
+            Api.World.Logger.Audit("{0} Took 1x{1} from Kiln shelf index {3} at {2}.",
                 byPlayer.PlayerName,
                 stack?.Collectible.Code,
                 Pos,
