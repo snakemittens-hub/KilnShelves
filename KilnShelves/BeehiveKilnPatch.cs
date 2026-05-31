@@ -1,7 +1,9 @@
 ﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using Vintagestory.API.Common;
 using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
@@ -14,7 +16,14 @@ public static class BeehiveKilnPatch
 
     public static void ApplyAll(Harmony harmony)
     {
-        Apply(harmony, typeof(BlockEntityBeeHiveKiln), "OnServerTick3s", transpiler: nameof(KilnHeatDamageTranspiler));
+        //Target line is present as a lambda function passed to WalkMatchingBlocks compiled into inner class BlockEntityBeehiveKiln/'<>c__DisplayClass24_0'
+        var constructedType = AccessTools.FirstInner(typeof(BlockEntityBeeHiveKiln), FindInnerClass);
+        Apply(harmony, constructedType, "<OnServerTick3s>b__0", transpiler: nameof(KilnHeatDamageTranspiler));
+    }
+
+    private static bool FindInnerClass(Type typeToSearch)
+    {
+        return typeToSearch.Name.Contains("DisplayClass24");
     }
     private static void Apply(Harmony harmony, System.Type target, string function, string? prefix = null, string? postfix = null, string? transpiler = null)
     {
@@ -33,17 +42,18 @@ public static class BeehiveKilnPatch
     private static IEnumerable<CodeInstruction> KilnHeatDamageTranspiler(IEnumerable<CodeInstruction> instructions)
     {
         var codes = new List<CodeInstruction>(instructions);
-        var setBlock = AccessTools.Method(typeof(IBlockAccessor), "SetBlock", new[] {typeof(int), typeof(BlockPos)});
-        var injectMethod = AccessTools.Method(typeof(BeehiveKilnPatch), nameof(InjectCustomHeatDamageUpdate));
-        Api.Logger.Debug("[KilnShelves] BeehiveKiln Harmony patch started ");
+        var setBlock = AccessTools.Method(typeof(IBlockAccessor), nameof(IBlockAccessor.SetBlock), parameters: new[] {typeof(int), typeof(BlockPos)});
+        //var injectMethod = AccessTools.Method(typeof(BeehiveKilnPatch), nameof(InjectCustomHeatDamageUpdate));
+        //Api.Logger.Debug("[KilnShelves] BeehiveKiln Harmony patch started ");
 
         for (int i = 0; i < codes.Count; i++)
         {
             var code = codes[i];
 
-            if (code.opcode == OpCodes.Callvirt && code.operand is MethodInfo mi && mi == setBlock)
+            if ((code.opcode == OpCodes.Callvirt || code.opcode == OpCodes.Call) && code.operand is MethodInfo mi && mi == setBlock)
             {
-                yield return new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(IBlockAccessor), "ExchangeBlock")); //swap SetBlock for ExchangeBlock to preserve blockentity information
+                //swap SetBlock for ExchangeBlock to preserve blockentity information
+                yield return new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(IBlockAccessor), nameof(IBlockAccessor.ExchangeBlock)));
                 Api.Logger.Debug("[KilnShelves] BeehiveKiln Harmony patch applied");
             }
             else yield return code;
@@ -51,10 +61,14 @@ public static class BeehiveKilnPatch
         }
     }
 
-    public static void InjectCustomHeatDamageUpdate(IBlockAccessor blockAccessor, Block block, BlockPos pos)
-    {
-        if(blockAccessor.GetBlockEntity(pos) is BlockEntityKilnShelf)
-            blockAccessor.ExchangeBlock(((CollectibleObject) Api.World.GetBlock(((RegistryObject)block).CodeWithVariant("state", "damaged"))).Id, pos);
-        else blockAccessor.SetBlock(((CollectibleObject) Api.World.GetBlock(((RegistryObject)block).CodeWithVariant("state", "damaged"))).Id, pos);
-    }
+    //public static void InjectCustomHeatDamageUpdate(IBlockAccessor blockAccessor, Block block, BlockPos pos, bool StructureComplete)
+    //{
+    //    if (blockAccessor.GetBlockEntity(pos) is BlockEntityKilnShelf)
+    //        blockAccessor.ExchangeBlock(((CollectibleObject)Api.World.GetBlock(((RegistryObject)block).CodeWithVariant("state", "damaged"))).Id, pos);
+    //    else
+    //    {
+    //        blockAccessor.SetBlock(((CollectibleObject)Api.World.GetBlock(((RegistryObject)block).CodeWithVariant("state", "damaged"))).Id, pos);
+    //        StructureComplete = false;
+    //    }
+    //}
 }

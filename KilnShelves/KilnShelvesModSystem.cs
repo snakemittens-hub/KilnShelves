@@ -21,5 +21,11 @@ namespace KilnShelves
             api.Logger.Notification("Stackable Kiln Shelves Mod: Started.");
         }
 
+        public override void Dispose()
+        {
+            harmony?.UnpatchAll(Mod.Info.ModID);
+            base.Dispose();
+        }
+
     }
 }
