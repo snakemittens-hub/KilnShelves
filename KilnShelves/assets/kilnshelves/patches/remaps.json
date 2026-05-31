@@ -2,16 +2,16 @@
   {
     "op": "add",
     "file": "game:config/remaps.json",
-    "path": "/kilnshelves:v1.1",
+    "path": "/kilnshelves:kilnshelfdamage",
     "value": [
-        "/bir remap kilnshelf-good-north kilnshelf-north force",
-        "/bir remap kilnshelf-good-south kilnshelf-south force",
-        "/bir remap kilnshelf-good-east kilnshelf-east force",
-        "/bir remap kilnshelf-good-west kilnshelf-west force",
-        "/bir remap kilnshelffull-good-north kilnshelffull-north force",
-        "/bir remap kilnshelffull-good-south kilnshelffull-south force",
-        "/bir remap kilnshelffull-good-east kilnshelffull-east force",
-        "/bir remap kilnshelffull-good-west kilnshelffull-west force"
+        "/bir remapq game:kilnshelf-good-north game:kilnshelf-north force",
+        "/bir remapq game:kilnshelf-good-south game:kilnshelf-south force",
+        "/bir remapq game:kilnshelf-good-east game:kilnshelf-east force",
+        "/bir remapq game:kilnshelf-good-west game:kilnshelf-west force",
+        "/bir remapq game:kilnshelffull-good-north game:kilnshelffull-north force",
+        "/bir remapq game:kilnshelffull-good-south game:kilnshelffull-south force",
+        "/bir remapq game:kilnshelffull-good-east game:kilnshelffull-east force",
+        "/bir remapq game:kilnshelffull-good-west game:kilnshelffull-west force"
     ]
   }
 ]
