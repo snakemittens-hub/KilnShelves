@@ -1,12 +1,12 @@
-﻿using Vintagestory.API.Client;
-using Vintagestory.API.Common;
-using Vintagestory.API.Config;
-using Vintagestory.API.Server;
+﻿using Vintagestory.API.Common;
+using HarmonyLib;
 
 namespace KilnShelves
 {
     public class KilnShelvesModSystem : ModSystem
     {
+        private Harmony harmony;
+
         // Called on server and client
         public override void Start(ICoreAPI api)
         {
@@ -14,7 +14,17 @@ namespace KilnShelves
             api.RegisterBlockEntityClass("BEKilnShelf", typeof(BlockEntityKilnShelf));
             api.RegisterCollectibleBehaviorClass("kilnshelves.Offhand", typeof(CollectibleBehaviorOffhand));
             api.RegisterCollectibleBehaviorClass("kilnshelves.StackShelf", typeof(CollectibleBehaviorStackShelf));
+            BeehiveKilnPatch.Api = api;
+            harmony = new Harmony(Mod.Info.ModID);
+            BeehiveKilnPatch.ApplyAll(harmony);
             api.Logger.Notification("Stackable Kiln Shelves Mod: Started.");
         }
+
+        public override void Dispose()
+        {
+            harmony?.UnpatchAll(Mod.Info.ModID);
+            base.Dispose();
+        }
+
     }
 }

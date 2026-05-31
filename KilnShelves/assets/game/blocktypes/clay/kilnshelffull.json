@@ -26,16 +26,16 @@
         "type": "block",
         "code": "kilnshelves:kilnplate-fired",
         "quantity": {
-          "avg": 1,
-          "var": 1
+          "avg": 1.8,
+          "var": 0.2
         }
       },
       {
         "type": "block",
         "code": "kilnshelves:kilnsupport-fire-fired",
         "quantity": {
-          "avg": 5,
-          "var": 1
+          "avg": 6,
+          "var": 2
         }
       }
     ]
