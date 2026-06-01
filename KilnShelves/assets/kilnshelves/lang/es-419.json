@@ -13,5 +13,7 @@
   "kilnshelves:block-kilnsupport-fire-fired": "Soporte para estanteria del horno",
   "kilnshelves:block-kilnsupport-fire-raw": "Soporte para estanteria del horno sin cocer",
 
+  "kilnshelves:needsfix": "¡Las estanterias son dañadas y se necesitan ser reemplazados!",
+
   "game:tabname-kilnshelves": "Estanterias del horno"
 }

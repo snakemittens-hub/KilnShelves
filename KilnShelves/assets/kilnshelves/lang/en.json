@@ -13,5 +13,7 @@
   "kilnshelves:blockdesc-kilnsupport-fire-fired": "Used with a kiln shelf plate to build kiln shelves.",
   "kilnshelves:block-kilnsupport-fire-raw": "Raw kiln shelf support",
 
+  "kilnshelves:needsfix": "Shelving is damaged and needs to be replaced!",
+
   "game:tabname-kilnshelves": "Stackable Kiln Shelves"
 }

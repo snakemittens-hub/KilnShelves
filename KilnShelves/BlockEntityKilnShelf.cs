@@ -288,7 +288,10 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
 
         Block block = Api.World.BlockAccessor.GetBlock(blockSel.Position);
         if (block.Code.ToString().Contains("damaged"))
+        {
+            (Api as ICoreClientAPI)?.TriggerIngameError(this, "needsfix", Lang.Get("kilnshelves:needsfix"));
             return false;
+        }
 
         var heldSlot = byPlayer.InventoryManager.ActiveHotbarSlot;
 
