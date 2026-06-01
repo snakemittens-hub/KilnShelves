@@ -1,0 +1,17 @@
+{
+  "game:block-kilnshelffull-good*": "Estanterias del horno",
+  "game:block-kilnshelffull-damaged*": "Estanterias dañadas del horno",
+  "game:block-kilnshelf-good*": "Estanteria del horno",
+  "game:block-kilnshelf-damaged*": "Estanteria dañada del horno",
+  "game:block-handbooktitle-kilnshelf*": "Uso y Elaboración:",
+  "game:block-handbooktext-kilnshelf*": "Coloque adentro un <a href=\"handbook://gamemechanicinfo-beehivekiln\">horno de colmena</a> para cocer más piezas de cerámica cruda.\n\nSe puede usar cuatro <a href=\"handbook://block-kilnshelves:kilnsupport-fire-fired\">soportes para estanteria del horno</a> en el mano secundaria y una <a href=\"handbook://block-kilnshelves:kilnplate-fired\">placa para estanteria del horno</a> en el mano principal a colocar un nuevo estanteria del horno o actualizar uno existente.",
+
+  "kilnshelves:blockdesc-kilnplate-fired": "Utiliza con unos soportes para construir las estanterias del horno.",
+  "kilnshelves:block-kilnplate-fired": "Placa para estanteria del horno",
+  "kilnshelves:block-kilnplate-raw": "Placa para estanteria del horno sin cocer",
+  "kilnshelves:blockdesc-kilnsupport-fire-fired": "Utiliza con una placa para construir las estanterias del horno.",
+  "kilnshelves:block-kilnsupport-fire-fired": "Soporte para estanteria del horno",
+  "kilnshelves:block-kilnsupport-fire-raw": "Soporte para estanteria del horno sin cocer",
+
+  "game:tabname-kilnshelves": "Estanterias del horno"
+}
