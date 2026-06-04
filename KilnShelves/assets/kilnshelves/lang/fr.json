@@ -1,0 +1,16 @@
+﻿{
+  "game:block-kilnshelffull-good*": "Étagères d'enfournement",
+  "game:block-kilnshelffull-damaged*": "Étagères d'enfournement endommagées",
+  "game:block-kilnshelf-good*": "Étagère d'enfournement",
+  "game:block-kilnshelf-damaged*": "Étagère d'enfournement endommagée",
+  "game:block-handbooktitle-kilnshelf*": "Utilisation et fabrication :",
+  "game:block-handbooktext-kilnshelf*": "Placez à l'intérieur d'un <a href=\"handbook://gamemechanicinfo-beehivekiln\">four à ruche</a> afin d'y faire tenir davantage de poteries brutes pour la cuisson.\n\nQuatre <a href=\"handbook://block-kilnshelves:kilnsupport-fire-fired\">supports d'étagère d'enfournement</a> dans la main secondaire et un <a href=\"handbook://block-kilnshelves:kilnplate-fired\">plateau d'étagère d'enfournement</a> dans la main principale peuvent être utilisés pour placer une nouvelle étagère d'enfournement ou améliorer une étagère existante.",
+  "kilnshelves:blockdesc-kilnplate-fired": "Utilisé avec des supports d'étagère d'enfournement pour construire des étagères d'enfournement.",
+  "kilnshelves:block-kilnplate-fired": "Plateau d'étagère d'enfournement",
+  "kilnshelves:block-kilnplate-raw": "Plateau d'étagère d'enfournement brut",
+  "kilnshelves:block-kilnsupport-fire-fired": "Support d'étagère d'enfournement",
+  "kilnshelves:blockdesc-kilnsupport-fire-fired": "Utilisé avec un plateau d'étagère d'enfournement pour construire des étagères d'enfournement.",
+  "kilnshelves:block-kilnsupport-fire-raw": "Support d'étagère d'enfournement brut",
+  "kilnshelves:needsfix": "Les étagères d'enfournement sont endommagées et doivent être remplacées !",
+  "game:tabname-kilnshelves": "Étagères d'enfournement empilables"
+}
