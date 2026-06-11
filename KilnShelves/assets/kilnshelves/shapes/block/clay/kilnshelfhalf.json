@@ -8,8 +8,8 @@
 	"textureSizes": {
 	},
 	"textures": {
-		"material": "block/clay/brickpile/burned/fire-brick1",
-		"fire": "block/clay/hardened/fire"
+		"material": "game:block/clay/brickpile/burned/fire-brick1",
+		"fire": "game:block/clay/hardened/fire"
 	},
 	"elements": [
 		{

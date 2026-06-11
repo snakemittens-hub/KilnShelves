@@ -2,6 +2,17 @@
   {
     "file": "game:blocktypes/clay/door-kiln",
     "op": "remove",
+    "path": "/attributes/multiblockStructure/blockNumbers/cokeovendoor-*"
+  },
+  {
+    "file": "game:blocktypes/clay/door-kiln",
+    "op": "add",
+    "path": "/attributes/multiblockStructure/blockNumbers/*:@(cokeovendoor-.*|blackbronzekilndoor-.*)",
+    "value": 4
+  },
+  {
+    "file": "game:blocktypes/clay/door-kiln",
+    "op": "remove",
     "path": "/attributes/multiblockStructure/blockNumbers/@(air|groundstorage|refractorybrickgrating-good-.*)"
   },
   {

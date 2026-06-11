@@ -7,7 +7,7 @@
   {
     "file": "game:blocktypes/clay/door-kiln",
     "op": "add",
-    "path": "/attributes/multiblockStructure/blockNumbers/*:@(air|groundstorage|refractorybrickgrating-good-.*|kilnshelf.*)",
+    "path": "/attributes/multiblockStructure/blockNumbers/*:@(air|groundstorage|refractorybrickgrating-good-.*|limepile.*|quicklimepile.*|kilnshelf.*)",
     "value": 7
   },
   {
@@ -18,7 +18,7 @@
   {
     "file": "game:blocktypes/clay/door-kiln",
     "op": "add",
-    "path": "/attributes/multiblockStructure/blockNumbers/*:@(air|groundstorage|kilnshelf.*)",
+    "path": "/attributes/multiblockStructure/blockNumbers/*:@(air|groundstorage|limepile.*|quicklimepile.*|kilnshelf.*)",
     "value": 8
   }
 ]

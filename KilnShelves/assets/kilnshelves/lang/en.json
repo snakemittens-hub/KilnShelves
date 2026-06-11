@@ -1,8 +1,8 @@
 {
-  "game:block-kilnshelffull-good*": "Kiln shelves",
-  "game:block-kilnshelffull-damaged*": "Damaged kiln shelves",
-  "game:block-kilnshelf-good*": "Kiln shelf",
-  "game:block-kilnshelf-damaged*": "Damaged kiln shelf",
+  "kilnshelves:block-kilnshelffull-good*": "Kiln shelves",
+  "kilnshelves:block-kilnshelffull-damaged*": "Damaged kiln shelves",
+  "kilnshelves:block-kilnshelf-good*": "Kiln shelf",
+  "kilnshelves:block-kilnshelf-damaged*": "Damaged kiln shelf",
   "game:block-handbooktitle-kilnshelf*": "Use and Crafting:",
   "game:block-handbooktext-kilnshelf*": "Place inside of a <a href=\"handbook://gamemechanicinfo-beehivekiln\">beehive kiln</a> to fit more raw pottery for firing.\n\nFour <a href=\"handbook://block-kilnshelves:kilnsupport-fire-fired\">kiln shelf supports</a> in the offhand and one <a href=\"handbook://block-kilnshelves:kilnplate-fired\">kiln shelf plate</a> in the mainhand can be used to place a new kiln shelf or upgrade an existing one.",
 

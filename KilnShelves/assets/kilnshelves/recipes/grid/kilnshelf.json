@@ -16,7 +16,7 @@
 		"height": 1,
 		"output": {
 			"type": "block",
-			"code": "game:kilnshelf-good-north"
+			"code": "kilnshelves:kilnshelf-good-north"
 		}
 	},
 	{
@@ -24,14 +24,14 @@
 		"ingredients": {
 			"F": {
 				"type": "block",
-				"code": "game:kilnshelffull-*"
+				"code": "kilnshelves:kilnshelffull-*"
 			}
 		},
 		"width": 1,
 		"height": 1,
 		"output": {
 			"type": "block",
-			"code": "game:kilnshelf-good-north",
+			"code": "kilnshelves:kilnshelf-good-north",
 			"quantity": 2
 		}
 	},
@@ -40,14 +40,14 @@
 		"ingredients": {
 			"H": {
 				"type": "block",
-				"code": "game:kilnshelf-*"
+				"code": "kilnshelves:kilnshelf-*"
 			}
 		},
 		"width": 1,
 		"height": 2,
 		"output": {
 			"type": "block",
-			"code": "game:kilnshelffull-good-north",
+			"code": "kilnshelves:kilnshelffull-good-north",
 			"quantity": 1
 		}
 	}

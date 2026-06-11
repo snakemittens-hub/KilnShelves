@@ -4,14 +4,37 @@
     "file": "game:config/remaps.json",
     "path": "/kilnshelves:kilnshelfdamage",
     "value": [
-        "/bir remapq game:kilnshelf-good-north game:kilnshelf-north force",
-        "/bir remapq game:kilnshelf-good-south game:kilnshelf-south force",
-        "/bir remapq game:kilnshelf-good-east game:kilnshelf-east force",
-        "/bir remapq game:kilnshelf-good-west game:kilnshelf-west force",
-        "/bir remapq game:kilnshelffull-good-north game:kilnshelffull-north force",
-        "/bir remapq game:kilnshelffull-good-south game:kilnshelffull-south force",
-        "/bir remapq game:kilnshelffull-good-east game:kilnshelffull-east force",
-        "/bir remapq game:kilnshelffull-good-west game:kilnshelffull-west force"
+      "/bir remapq kilnshelves:kilnshelf-good-north game:kilnshelf-north force",
+      "/bir remapq kilnshelves:kilnshelf-good-south game:kilnshelf-south force",
+      "/bir remapq kilnshelves:kilnshelf-good-east game:kilnshelf-east force",
+      "/bir remapq kilnshelves:kilnshelf-good-west game:kilnshelf-west force",
+      "/bir remapq kilnshelves:kilnshelffull-good-north game:kilnshelffull-north force",
+      "/bir remapq kilnshelves:kilnshelffull-good-south game:kilnshelffull-south force",
+      "/bir remapq kilnshelves:kilnshelffull-good-east game:kilnshelffull-east force",
+      "/bir remapq kilnshelves:kilnshelffull-good-west game:kilnshelffull-west force"
+    ]
+  },
+  {
+    "op": "add",
+    "file": "game:config/remaps.json",
+    "path": "/kilnshelves:kilnshelves_domain",
+    "value": [
+      "/bir remapq kilnshelves:kilnshelf-good-north game:kilnshelf-good-north force",
+      "/bir remapq kilnshelves:kilnshelf-good-south game:kilnshelf-good-south force",
+      "/bir remapq kilnshelves:kilnshelf-good-east game:kilnshelf-good-east force",
+      "/bir remapq kilnshelves:kilnshelf-good-west game:kilnshelf-good-west force",
+      "/bir remapq kilnshelves:kilnshelffull-good-north game:kilnshelffull-good-north force",
+      "/bir remapq kilnshelves:kilnshelffull-good-south game:kilnshelffull-good-south force",
+      "/bir remapq kilnshelves:kilnshelffull-good-east game:kilnshelffull-good-east force",
+      "/bir remapq kilnshelves:kilnshelffull-good-west game:kilnshelffull-good-west force",
+      "/bir remapq kilnshelves:kilnshelf-damaged-north game:kilnshelf-damaged-north force",
+      "/bir remapq kilnshelves:kilnshelf-damaged-south game:kilnshelf-damaged-south force",
+      "/bir remapq kilnshelves:kilnshelf-damaged-east game:kilnshelf-damaged-east force",
+      "/bir remapq kilnshelves:kilnshelf-damaged-west game:kilnshelf-damaged-west force",
+      "/bir remapq kilnshelves:kilnshelffull-damaged-north game:kilnshelffull-damaged-north force",
+      "/bir remapq kilnshelves:kilnshelffull-damaged-south game:kilnshelffull-damaged-south force",
+      "/bir remapq kilnshelves:kilnshelffull-damaged-east game:kilnshelffull-damaged-east force",
+      "/bir remapq kilnshelves:kilnshelffull-damaged-west game:kilnshelffull-damaged-west force"
     ]
   }
 ]
