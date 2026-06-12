@@ -14,6 +14,7 @@
   "kilnshelves:block-kilnsupport-fire-raw": "Soporte para estanteria del horno sin cocer",
 
   "kilnshelves:needsfix": "¡Las estanterias son dañadas y se necesitan ser reemplazados!",
+  "kilnshelves:notenoughsupports": "Necesita al menos 4 soportes para colocar un estante",
 
   "game:tabname-kilnshelves": "Estanterias del horno"
 }

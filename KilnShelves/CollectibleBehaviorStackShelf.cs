@@ -1,5 +1,7 @@
-﻿using Vintagestory.API.Common;
+﻿using Vintagestory.API.Client;
+using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
+using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 
 namespace KilnShelves;
@@ -66,6 +68,10 @@ public class CollectibleBehaviorStackShelf:CollectibleBehavior
                     if ((api != null ? (api.Side == EnumAppSide.Server ? 1 : 0) : 0) == 0)
                         return;
                     ((Entity)byEntity).World.BlockAccessor.MarkBlockDirty(blockSel.Position, (IPlayer)null);
+                }
+                else
+                {
+                    (Api as ICoreClientAPI)?.TriggerIngameError(this, "notenoughsupports", Lang.Get("kilnshelves:notenoughsupports"));
                 }
             }
         }

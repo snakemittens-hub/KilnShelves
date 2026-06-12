@@ -14,6 +14,7 @@
   "kilnshelves:block-kilnsupport-fire-raw": "Raw kiln shelf support",
 
   "kilnshelves:needsfix": "Shelving is damaged and needs to be replaced!",
+  "kilnshelves:notenoughsupports": "Need at least 4 supports to place shelf",
 
   "game:tabname-kilnshelves": "Stackable Kiln Shelves"
 }

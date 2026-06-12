@@ -62,9 +62,4 @@
   </Content>
 </ItemGroup>
 
-<ItemGroup>
-  <Folder Include="assets\game\blocktypes\clay\" />
-  <Folder Include="assets\game\shapes\block\clay\" />
-</ItemGroup>
-
 </Project>
