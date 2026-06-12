@@ -26,7 +26,7 @@ public class CollectibleBehaviorStackShelf:CollectibleBehavior
         else
         {
             IWorldAccessor world = byEntity?.World;
-            if (!(world.GetBlock(new AssetLocation("game:kilnshelf-good-north")) is BlockKilnShelf block)) return;
+            if (!(world.GetBlock(new AssetLocation("kilnshelves:kilnshelf-good-north")) is BlockKilnShelf block)) return;
             IPlayer player = (IPlayer)null;
             if (byEntity is EntityPlayer)
                 player = world.PlayerByUid(((EntityPlayer)byEntity).PlayerUID);
