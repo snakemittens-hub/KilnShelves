@@ -1,0 +1,20 @@
+{
+  "kilnshelves:block-kilnshelffull-good*": "Печные полки",
+  "kilnshelves:block-kilnshelffull-damaged*": "Повреждённые печные полки",
+  "kilnshelves:block-kilnshelf-good*": "Печная полка",
+  "kilnshelves:block-kilnshelf-damaged*": "Повреждённая печная полка",
+  "game:block-handbooktitle-kilnshelf*": "Использование и создание:",
+  "game:block-handbooktext-kilnshelf*": "Поместите внутрь <a href=\"handbook://gamemechanicinfo-beehivekiln\">ульевой печи</a>, чтобы вместить больше сырой керамики для обжига.\n\nИспользуйте четыре <a href=\"handbook://block-kilnshelves:kilnsupport-fire-fired\">подпорки</a> в левой руке и одну <a href=\"handbook://block-kilnshelves:kilnplate-fired\">плиту для полки</a> в правой руке, чтобы установить новую полку или добавить ярус.",
+
+  "kilnshelves:blockdesc-kilnplate-fired": "Используется вместе с подпорками для сборки полок.",
+  "kilnshelves:block-kilnplate-fired": "Плита для печной полки",
+  "kilnshelves:block-kilnplate-raw": "Плита для печной полки (необож.)",
+  "kilnshelves:block-kilnsupport-fire-fired": "Подпорка из огнеупорной глины для печной полки",
+  "kilnshelves:blockdesc-kilnsupport-fire-fired": "Используется вместе с плитой для сборки полок для печи.",
+  "kilnshelves:block-kilnsupport-fire-raw": "Подпорка из огнеупорной глины для печной полки (необож.)",
+
+  "kilnshelves:needsfix": "Полка повреждена и требует замены!",
+  "kilnshelves:notenoughsupports": "Для установки необходимо как минимум 4 подпорки",
+
+  "game:tabname-kilnshelves": "Stackable Kiln Shelves"
+}
