@@ -168,10 +168,59 @@ public class BlockEntityKilnShelf : BlockEntityGroundStorage
     {
         ItemSlot slot = player.InventoryManager.ActiveHotbarSlot;
 
+        // Because this BE subclasses BlockEntityGroundStorage, ground-storable items never
+        // reach vanilla "place above" logic. Create storage on the top of a full shelf instead.
+        if (!slot.Empty && ShouldGroundStoreOnTop(bs, slot.Itemstack))
+        {
+            if (TryGroundStoreOnTop(player, bs)) return true;
+        }
+
         if (slot.Empty) return TryTake(player, bs);
         else if (GetShelvableLayout(slot.Itemstack) != null) return TryPut(player, bs);
 
         return false;
+    }
+
+    private bool ShouldGroundStoreOnTop(BlockSelection bs, ItemStack stack)
+    {
+        if (Block?.Code?.Path?.Contains("kilnshelffull") != true) return false;
+        if (bs.SelectionBoxIndex != 4 && bs.Face != BlockFacing.UP) return false;
+        return stack.Collectible?.GetBehavior<CollectibleBehaviorGroundStorable>() != null;
+    }
+
+    private bool TryGroundStoreOnTop(IPlayer player, BlockSelection bs)
+    {
+        var world = Api.World;
+        BlockPos above = Pos.UpCopy();
+
+        if (world.BlockAccessor.GetBlockEntity(above) is BlockEntityGroundStorage existing
+            and not BlockEntityKilnShelf)
+        {
+            var aboveSel = bs.Clone();
+            aboveSel.Position = above;
+            aboveSel.DidOffset = false;
+            aboveSel.Face = BlockFacing.UP;
+            return existing.OnPlayerInteractStart(player, aboveSel);
+        }
+
+        if (world.BlockAccessor.GetBlock(above).Replaceable < 6000) return false;
+
+        if (world.GetBlock(new AssetLocation("groundstorage")) is not BlockGroundStorage blockgs)
+            return false;
+
+        if (!Block.CanAttachBlockAt(world.BlockAccessor, blockgs, Pos, BlockFacing.UP))
+            return false;
+
+        var createSel = new BlockSelection
+        {
+            Position = Pos.Copy(),
+            Face = BlockFacing.UP,
+            SelectionBoxIndex = -1,
+            HitPosition = bs.HitPosition,
+            DidOffset = false
+        };
+
+        return blockgs.CreateStorage(world, createSel, player);
     }
     protected override void Dispose()
     {
